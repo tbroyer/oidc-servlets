@@ -14,7 +14,9 @@ errorprone-annotations = { module = "com.google.errorprone:error_prone_annotatio
 errorprone-typeAnnotations = { module = "com.google.errorprone:error_prone_type_annotations", version.ref = "errorprone" }
 jetty-bom = { module = "org.eclipse.jetty:jetty-bom", version.ref = "jetty" }
 jetty-ee10-bom = { module = "org.eclipse.jetty.ee10:jetty-ee10-bom", version.ref = "jetty" }
+jetty-jsp = { module = "org.eclipse.jetty.ee10:jetty-ee10-apache-jsp" }
 jetty-servlet = { module = "org.eclipse.jetty.ee10:jetty-ee10-servlet" }
+nimbus-oidcSdk = "com.nimbusds:oauth2-oidc-sdk:11.10.1"
 nullaway-annotations = { module = "com.uber.nullaway:nullaway-annotations", version.ref = "nullaway" }
 
 # Used in bundle below
