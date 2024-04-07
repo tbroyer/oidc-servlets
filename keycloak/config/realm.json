@@ -1,0 +1,30 @@
+{
+  "realm": "example",
+  "enabled": true,
+  "users": [ {
+    "username": "user",
+    "enabled": true,
+    "email": "user@example.com",
+    "emailVerified": true,
+    "firstName": "User",
+    "lastName": "User",
+    "credentials": [ {
+      "type": "password",
+      "value": "user"
+    } ]
+  } ],
+  "clients": [ {
+    "clientId": "app",
+    "enabled": true,
+    "clientAuthenticatorType": "client-secret",
+    "secret": "$(env:APP_CLIENT_SECRET)",
+    "rootUrl": "$(env:APP_BASE_URL)",
+    "baseUrl": "/",
+    "redirectUris": [
+      "/callback"
+    ],
+    "attributes":{
+      "post.logout.redirect.uris": "/"
+    }
+  } ]
+}
