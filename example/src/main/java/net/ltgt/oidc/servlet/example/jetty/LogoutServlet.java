@@ -6,14 +6,28 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URI;
 
 public class LogoutServlet extends HttpServlet {
+  private static final String REDIRECT_BACK_AFTER_LOGOUT = "redirect-back-after-logout";
+
   private Configuration configuration;
+  private Boolean redirectBackAfterLogout;
+
+  public LogoutServlet() {}
+
+  public LogoutServlet(boolean redirectBackAfterLogout) {
+    this.redirectBackAfterLogout = redirectBackAfterLogout;
+  }
 
   @Override
   public void init() throws ServletException {
     configuration =
         (Configuration) getServletContext().getAttribute(Configuration.CONTEXT_ATTRIBUTE_NAME);
+    if (redirectBackAfterLogout == null) {
+      this.redirectBackAfterLogout =
+          Boolean.parseBoolean(getInitParameter(REDIRECT_BACK_AFTER_LOGOUT));
+    }
   }
 
   // XXX: what to do on GET? show interstitial?
@@ -44,10 +58,17 @@ public class LogoutServlet extends HttpServlet {
       return;
     }
 
+    // TODO: get a dynamic redirection URI as request parameter (need to validate its value),
+    //       and use a specific logout callback URI; on return from OP, redirect to the stored URI.
+    //       Maybe use a state in addition then (to be checked in the logout callback URI)
     var logoutRequest =
         new LogoutRequest(
             configuration.providerMetadata().getEndSessionEndpointURI(),
-            sessionInfo.oidcTokens().getIDToken());
+            sessionInfo.oidcTokens().getIDToken(),
+            redirectBackAfterLogout
+                ? URI.create(req.getRequestURL().toString()).resolve("/")
+                : null,
+            null);
     Utils.sendRedirect(resp, logoutRequest.toURI().toASCIIString());
   }
 }

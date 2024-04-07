@@ -32,17 +32,18 @@ public class Main {
 
     var contextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
     contextHandler.setBaseResourceAsString(args[0]);
+    contextHandler.setProtectedTargets(new String[] {"/WEB-INF"});
     server.setHandler(contextHandler);
 
     contextHandler.setAttribute(Configuration.CONTEXT_ATTRIBUTE_NAME, configuration);
 
     contextHandler.addFilter(UserFilter.class, "/*", null);
     contextHandler.addServlet(CallbackServlet.class, configuration.callbackPath());
-    contextHandler.addServlet(LogoutServlet.class, "/logout");
+    contextHandler.addServlet(new LogoutServlet(true), "/logout");
     // TODO: back-channel logout
     // contextHandler.addServlet(BackChannelLogoutServlet.class, "/backchannel-logout");
 
-    contextHandler.addFilter(IsAuthenticatedFilter.class, "/*", null);
+    contextHandler.addFilter(IsAuthenticatedFilter.class, "/private/*", null);
 
     contextHandler.addServlet(DefaultServlet.class, "/");
 

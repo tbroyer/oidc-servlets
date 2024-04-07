@@ -2,12 +2,12 @@
 <!doctype html>
 <html>
 <head>
-    <title>Home</title>
+    <title>Private</title>
 </head>
 <body>
-<h1>Home</h1>
+<h1>Private</h1>
 
-<p><a href="/private/">Go to private</a></p>
+<p><a href="/">Go to home</a></p>
 
 <%@ include file="/WEB-INF/user.jsp" %>
 
