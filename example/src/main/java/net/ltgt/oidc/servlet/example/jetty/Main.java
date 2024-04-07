@@ -44,6 +44,7 @@ public class Main {
     // contextHandler.addServlet(BackChannelLogoutServlet.class, "/backchannel-logout");
 
     contextHandler.addFilter(IsAuthenticatedFilter.class, "/private/*", null);
+    contextHandler.addFilter(new HasRoleFilter("admin"), "/admin/*", null);
 
     contextHandler.addServlet(DefaultServlet.class, "/");
 
