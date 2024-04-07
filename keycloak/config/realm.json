@@ -1,7 +1,31 @@
 {
   "realm": "example",
   "enabled": true,
+  "roles" : {
+    "realm" : [ {
+      "name" : "admin",
+      "composite" : true,
+      "composites" : {
+        "client" : {
+          "realm-management" : [ "manage-users", "realm-admin" ]
+        }
+      },
+      "clientRole" : false
+    } ]
+  },
   "users": [ {
+    "username": "admin",
+    "enabled": true,
+    "email": "admin@localhost",
+    "emailVerified": true,
+    "firstName": "Admin",
+    "lastName": "Admin",
+    "realmRoles": [ "admin" ],
+    "credentials": [ {
+      "type": "password",
+      "value": "admin"
+    } ]
+  }, {
     "username": "user",
     "enabled": true,
     "email": "user@example.com",
@@ -25,6 +49,17 @@
     ],
     "attributes":{
       "post.logout.redirect.uris": "/"
-    }
+    },
+    "protocolMappers": [ {
+      "name": "realm roles",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-realm-role-mapper",
+      "consentRequired": false,
+      "config": {
+        "multivalued": "true",
+        "userinfo.token.claim": "true",
+        "claim.name": "realm_access.roles"
+      }
+    } ]
   } ]
 }

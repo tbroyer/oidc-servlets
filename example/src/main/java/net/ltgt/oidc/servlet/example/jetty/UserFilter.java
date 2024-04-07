@@ -36,6 +36,11 @@ public class UserFilter extends HttpFilter {
       public Principal getUserPrincipal() {
         return userPrincipal;
       }
+
+      @Override
+      public boolean isUserInRole(String role) {
+        return userPrincipal.hasRole(role);
+      }
     };
   }
 }
