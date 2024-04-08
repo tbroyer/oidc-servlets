@@ -18,12 +18,13 @@ import org.eclipse.jetty.server.Server;
 
 public class Main {
 
+  private static final String CALLBACK_PATH = "/callback";
+
   public static void main(String[] args) throws Exception {
     var configuration =
         new Configuration(
             OIDCProviderMetadata.resolve(
                 new Issuer(requireNonNull(System.getProperty("example.issuer")))),
-            "/callback",
             new ClientSecretBasic(
                 new ClientID(requireNonNull(System.getProperty("example.clientId"))),
                 new Secret(requireNonNull(System.getProperty("example.clientSecret")))));
@@ -36,12 +37,16 @@ public class Main {
     server.setHandler(contextHandler);
 
     contextHandler.setAttribute(Configuration.CONTEXT_ATTRIBUTE_NAME, configuration);
+    contextHandler.setAttribute(
+        AuthenticationRedirector.CONTEXT_ATTRIBUTE_NAME,
+        new AuthenticationRedirector(configuration, CALLBACK_PATH));
 
     contextHandler.addFilter(UserFilter.class, "/*", null);
-    contextHandler.addServlet(CallbackServlet.class, configuration.callbackPath());
+    contextHandler.addServlet(CallbackServlet.class, CALLBACK_PATH);
     contextHandler.addServlet(new LogoutServlet(true), "/logout");
     // TODO: back-channel logout
     // contextHandler.addServlet(BackChannelLogoutServlet.class, "/backchannel-logout");
+    contextHandler.addServlet(LoginServlet.class, "/login");
 
     contextHandler.addFilter(IsAuthenticatedFilter.class, "/private/*", null);
     contextHandler.addFilter(new HasRoleFilter("admin"), "/admin/*", null);

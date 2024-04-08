@@ -7,10 +7,13 @@
 <body>
 <h1>Home</h1>
 
-<p><a href="/private/">Go to private</a></p>
+<ul>
+<li><a href="/other.jsp">Go to other page</a>
+<li><a href="/private/">Go to private</a>
 <% if (request.isUserInRole("admin")) { %>
-<p><a href="/admin/">Go to admin</a></p>
+<li><a href="/admin/">Go to admin</a>
 <% } %>
+</ul>
 
 <%@ include file="/WEB-INF/user.jsp" %>
 

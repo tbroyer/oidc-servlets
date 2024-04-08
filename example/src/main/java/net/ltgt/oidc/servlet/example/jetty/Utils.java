@@ -1,10 +1,15 @@
 package net.ltgt.oidc.servlet.example.jetty;
 
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.net.URI;
 
-class Utils {
+public class Utils {
+
+  public static final String RETURN_TO_PARAMETER_NAME = "return-to";
+
   private Utils() {
     // non-instantiable
   }
@@ -49,5 +54,31 @@ class Utils {
       actualOrigin += "/";
     }
     return req.getRequestURL().toString().startsWith(actualOrigin);
+  }
+
+  static String getReturnToParameter(HttpServletRequest req) {
+    var returnTo = req.getParameter(RETURN_TO_PARAMETER_NAME);
+    if (returnTo == null) {
+      return "/";
+    }
+    var rootUri = URI.create(req.getRequestURL().toString()).resolve("/");
+    var returnToUri = rootUri.resolve(returnTo);
+    var relativized = rootUri.relativize(returnToUri);
+    if (relativized.equals(returnToUri)) {
+      return "/";
+    }
+    return "/" + relativized.toASCIIString();
+  }
+
+  public static String getRequestUri(HttpServletRequest req) {
+    String requestUri, queryString;
+    if (req.getDispatcherType() == DispatcherType.FORWARD) {
+      requestUri = (String) req.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI);
+      queryString = (String) req.getAttribute(RequestDispatcher.FORWARD_QUERY_STRING);
+    } else {
+      requestUri = req.getRequestURI();
+      queryString = req.getQueryString();
+    }
+    return queryString == null ? requestUri : requestUri + "?" + queryString;
   }
 }

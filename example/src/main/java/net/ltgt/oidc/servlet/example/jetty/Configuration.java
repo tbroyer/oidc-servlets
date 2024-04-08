@@ -5,7 +5,6 @@ import com.nimbusds.openid.connect.sdk.op.ReadOnlyOIDCProviderMetadata;
 
 public record Configuration(
     ReadOnlyOIDCProviderMetadata providerMetadata, //
-    String callbackPath,
     ClientAuthentication clientAuthentication //
     ) {
   static final String CONTEXT_ATTRIBUTE_NAME = Configuration.class.getName();
