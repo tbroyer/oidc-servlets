@@ -48,7 +48,7 @@
       "/callback"
     ],
     "attributes":{
-      "post.logout.redirect.uris": "/"
+      "post.logout.redirect.uris": "/logout_callback"
     },
     "protocolMappers": [ {
       "name": "realm roles",

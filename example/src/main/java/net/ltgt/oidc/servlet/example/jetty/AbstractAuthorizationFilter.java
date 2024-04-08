@@ -9,6 +9,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public abstract class AbstractAuthorizationFilter extends HttpFilter {
+  public static final String IS_PRIVATE_REQUEST_ATTRIBUTE_NAME =
+      AbstractAuthorizationFilter.class.getName() + ".is_private";
+
   private AuthenticationRedirector authenticationRedirector;
 
   @Override
@@ -23,6 +26,7 @@ public abstract class AbstractAuthorizationFilter extends HttpFilter {
       throws IOException, ServletException {
     if (isAuthorized(req)
         || req.getRequestURI().equals(authenticationRedirector.getCallbackPath())) {
+      req.setAttribute(IS_PRIVATE_REQUEST_ATTRIBUTE_NAME, true);
       super.doFilter(req, res, chain);
       return;
     }

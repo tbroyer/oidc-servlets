@@ -1,5 +1,6 @@
 package net.ltgt.oidc.servlet.example.jetty;
 
+import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.openid.connect.sdk.LogoutRequest;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -7,26 +8,36 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class LogoutServlet extends HttpServlet {
-  private static final String REDIRECT_BACK_AFTER_LOGOUT = "redirect-back-after-logout";
+  public static final String POST_LOGOUT_REDIRECT_PATH = "post-logout-redirect-path";
+  public static final String USE_LOGOUT_STATE = "use-logout-state";
 
   private Configuration configuration;
-  private Boolean redirectBackAfterLogout;
+  private @Nullable String postLogoutRedirectPath;
+  private Boolean useLogoutState;
 
   public LogoutServlet() {}
 
-  public LogoutServlet(boolean redirectBackAfterLogout) {
-    this.redirectBackAfterLogout = redirectBackAfterLogout;
+  public LogoutServlet(String postLogoutRedirectPath) {
+    this(postLogoutRedirectPath, false);
+  }
+
+  public LogoutServlet(String postLogoutRedirectPath, boolean useLogoutState) {
+    this.postLogoutRedirectPath = postLogoutRedirectPath;
+    this.useLogoutState = useLogoutState;
   }
 
   @Override
   public void init() throws ServletException {
     configuration =
         (Configuration) getServletContext().getAttribute(Configuration.CONTEXT_ATTRIBUTE_NAME);
-    if (redirectBackAfterLogout == null) {
-      this.redirectBackAfterLogout =
-          Boolean.parseBoolean(getInitParameter(REDIRECT_BACK_AFTER_LOGOUT));
+    if (postLogoutRedirectPath == null) {
+      postLogoutRedirectPath = getInitParameter(POST_LOGOUT_REDIRECT_PATH);
+    }
+    if (useLogoutState == null) {
+      useLogoutState = Boolean.parseBoolean(getInitParameter(USE_LOGOUT_STATE));
     }
   }
 
@@ -58,17 +69,24 @@ public class LogoutServlet extends HttpServlet {
       return;
     }
 
-    // TODO: get a dynamic redirection URI as request parameter (need to validate its value),
-    //       and use a specific logout callback URI; on return from OP, redirect to the stored URI.
-    //       Maybe use a state in addition then (to be checked in the logout callback URI)
+    State state;
+    if (postLogoutRedirectPath == null || !useLogoutState) {
+      state = null;
+    } else {
+      state = new State();
+      req.getSession()
+          .setAttribute(
+              LogoutState.SESSION_ATTRIBUTE_NAME,
+              new LogoutState(state, Utils.getReturnToParameter(req)));
+    }
     var logoutRequest =
         new LogoutRequest(
             configuration.providerMetadata().getEndSessionEndpointURI(),
             sessionInfo.oidcTokens().getIDToken(),
-            redirectBackAfterLogout
-                ? URI.create(req.getRequestURL().toString()).resolve("/")
+            postLogoutRedirectPath != null
+                ? URI.create(req.getRequestURL().toString()).resolve(postLogoutRedirectPath)
                 : null,
-            null);
+            state);
     Utils.sendRedirect(resp, logoutRequest.toURI().toASCIIString());
   }
 }

@@ -19,6 +19,7 @@ import org.eclipse.jetty.server.Server;
 public class Main {
 
   private static final String CALLBACK_PATH = "/callback";
+  private static final String LOGOUT_CALLBACK_PATH = "/logout_callback";
 
   public static void main(String[] args) throws Exception {
     var configuration =
@@ -43,7 +44,8 @@ public class Main {
 
     contextHandler.addFilter(UserFilter.class, "/*", null);
     contextHandler.addServlet(CallbackServlet.class, CALLBACK_PATH);
-    contextHandler.addServlet(new LogoutServlet(true), "/logout");
+    contextHandler.addServlet(new LogoutServlet(LOGOUT_CALLBACK_PATH, true), "/logout");
+    contextHandler.addServlet(LogoutCallbackServlet.class, LOGOUT_CALLBACK_PATH);
     // TODO: back-channel logout
     // contextHandler.addServlet(BackChannelLogoutServlet.class, "/backchannel-logout");
     contextHandler.addServlet(LoginServlet.class, "/login");

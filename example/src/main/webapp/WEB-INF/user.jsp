@@ -1,3 +1,4 @@
+<%@ page import="net.ltgt.oidc.servlet.example.jetty.AbstractAuthorizationFilter" %>
 <%@ page import="net.ltgt.oidc.servlet.example.jetty.UserPrincipal" %>
 <%@ page import="net.ltgt.oidc.servlet.example.jetty.Utils" %>
 
@@ -11,5 +12,9 @@
 <% } %>
 
 <form method=post action=/logout>
+<%-- Only include return-to parameter if linking to a public page --%>
+<% if (!Boolean.TRUE.equals(request.getAttribute(AbstractAuthorizationFilter.IS_PRIVATE_REQUEST_ATTRIBUTE_NAME))) { %>
+<input type=hidden name="<%= Utils.RETURN_TO_PARAMETER_NAME %>" value="<%= Utils.getRequestUri(request) %>">
+<% } %>
 <button type=submit>Logout</button>
 </form>
