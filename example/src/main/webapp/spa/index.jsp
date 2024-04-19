@@ -1,0 +1,18 @@
+<%@ page session="false" %>
+<%@ page import="net.ltgt.oidc.servlet.example.jetty.UserPrincipal" %>
+<!doctype html>
+<html>
+<head>
+    <title>SPA</title>
+    <script>
+    <%-- XXX: use proper JSON library --%>
+    const user = {
+        "name": "<%= ((UserPrincipal) request.getUserPrincipal()).sessionInfo().userInfo().getName() %>",
+        "admin": <%= request.isUserInRole("admin") %>
+    };
+    </script>
+    <script defer src="/spa/spa.js"></script>
+</head>
+<body>
+</body>
+</html>

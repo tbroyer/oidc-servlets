@@ -1,5 +1,7 @@
 package net.ltgt.oidc.servlet.example.jetty;
 
+import static jakarta.servlet.DispatcherType.FORWARD;
+import static jakarta.servlet.DispatcherType.REQUEST;
 import static java.util.Objects.requireNonNull;
 
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
@@ -9,17 +11,20 @@ import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import jakarta.servlet.ServletContext;
 import java.nio.file.Files;
+import java.util.EnumSet;
 import org.eclipse.jetty.ee10.apache.jsp.JettyJasperInitializer;
 import org.eclipse.jetty.ee10.jsp.JettyJspServlet;
 import org.eclipse.jetty.ee10.servlet.DefaultServlet;
 import org.eclipse.jetty.ee10.servlet.ServletContainerInitializerHolder;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
 
 public class Main {
 
   private static final String CALLBACK_PATH = "/callback";
   private static final String LOGOUT_CALLBACK_PATH = "/logout_callback";
+  private static final String DEFAULT_SERVLET_NAME = "default";
 
   public static void main(String[] args) throws Exception {
     var configuration =
@@ -53,7 +58,14 @@ public class Main {
     contextHandler.addFilter(IsAuthenticatedFilter.class, "/private/*", null);
     contextHandler.addFilter(new HasRoleFilter("admin"), "/admin/*", null);
 
-    contextHandler.addServlet(DefaultServlet.class, "/");
+    contextHandler.addFilter(
+        IsAuthenticatedFilter.class, "/spa/index.jsp", EnumSet.of(REQUEST, FORWARD));
+    var spaFilter = contextHandler.addFilter(SpaFilter.class, "/spa/*", null);
+    spaFilter.setAsyncSupported(false);
+    spaFilter.setInitParameter(SpaFilter.FORWARD_PATH, "/spa/");
+    spaFilter.setInitParameter(SpaFilter.DEFAULT_SERVLET_NAME, DEFAULT_SERVLET_NAME);
+
+    contextHandler.addServlet(new ServletHolder(DEFAULT_SERVLET_NAME, DefaultServlet.class), "/");
 
     contextHandler.addServletContainerInitializer(
         new ServletContainerInitializerHolder(JettyJasperInitializer.class));
