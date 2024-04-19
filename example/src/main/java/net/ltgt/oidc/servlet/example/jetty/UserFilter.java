@@ -8,8 +8,18 @@ import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.Principal;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class UserFilter extends HttpFilter {
+  private @Nullable LoggedOutSessionStore loggedOutSessionStore;
+
+  @Override
+  public void init() throws ServletException {
+    loggedOutSessionStore =
+        (LoggedOutSessionStore)
+            getServletContext().getAttribute(LoggedOutSessionStore.CONTEXT_ATTRIBUTE_NAME);
+  }
+
   @Override
   protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
       throws IOException, ServletException {
@@ -17,7 +27,13 @@ public class UserFilter extends HttpFilter {
     if (session != null) {
       var sessionInfo = (SessionInfo) session.getAttribute(SessionInfo.SESSION_ATTRIBUTE_NAME);
       if (sessionInfo != null) {
-        req = wrapRequest(req, sessionInfo);
+        if (loggedOutSessionStore != null
+            && sessionInfo.idTokenClaims().getSessionID() != null
+            && loggedOutSessionStore.isLoggedOut(sessionInfo.idTokenClaims().getSessionID())) {
+          session.invalidate();
+        } else {
+          req = wrapRequest(req, sessionInfo);
+        }
       }
     }
     super.doFilter(req, res, chain);

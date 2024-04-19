@@ -23,10 +23,6 @@ public class AuthenticationRedirector {
     this.callbackPath = callbackPath;
   }
 
-  public String getCallbackPath() {
-    return callbackPath;
-  }
-
   void redirectToAuthenticationEndpoint(
       HttpServletRequest req, HttpServletResponse res, String returnTo) {
     State state = new State();

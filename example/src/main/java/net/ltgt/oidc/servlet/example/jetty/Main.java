@@ -46,13 +46,16 @@ public class Main {
     contextHandler.setAttribute(
         AuthenticationRedirector.CONTEXT_ATTRIBUTE_NAME,
         new AuthenticationRedirector(configuration, CALLBACK_PATH));
+    contextHandler.setAttribute(
+        LoggedOutSessionStore.CONTEXT_ATTRIBUTE_NAME, new LoggedOutSessionStore());
+
+    contextHandler.addEventListener(new BackchannelLogoutSessionListener());
 
     contextHandler.addFilter(UserFilter.class, "/*", null);
     contextHandler.addServlet(CallbackServlet.class, CALLBACK_PATH);
     contextHandler.addServlet(new LogoutServlet(LOGOUT_CALLBACK_PATH, true), "/logout");
     contextHandler.addServlet(LogoutCallbackServlet.class, LOGOUT_CALLBACK_PATH);
-    // TODO: back-channel logout
-    // contextHandler.addServlet(BackChannelLogoutServlet.class, "/backchannel-logout");
+    contextHandler.addServlet(BackchannelLogoutServlet.class, "/backchannel-logout");
     contextHandler.addServlet(LoginServlet.class, "/login");
 
     contextHandler.addFilter(IsAuthenticatedFilter.class, "/private/*", null);

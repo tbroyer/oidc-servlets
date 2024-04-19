@@ -1,5 +1,7 @@
 package net.ltgt.oidc.servlet.example.jetty;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.errorprone.annotations.ForOverride;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -24,8 +26,7 @@ public abstract class AbstractAuthorizationFilter extends HttpFilter {
   @Override
   protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
       throws IOException, ServletException {
-    if (isAuthorized(req)
-        || req.getRequestURI().equals(authenticationRedirector.getCallbackPath())) {
+    if (isAuthorized(req) || isCallbackServlet(req)) {
       req.setAttribute(IS_PRIVATE_REQUEST_ATTRIBUTE_NAME, true);
       super.doFilter(req, res, chain);
       return;
@@ -38,6 +39,27 @@ public abstract class AbstractAuthorizationFilter extends HttpFilter {
   }
 
   protected abstract boolean isAuthorized(HttpServletRequest req);
+
+  @ForOverride
+  protected boolean isCallbackServlet(HttpServletRequest req) {
+    Class<?> servletClass;
+    try {
+      servletClass =
+          Class.forName(
+              requireNonNull(
+                      req.getServletContext()
+                          .getServletRegistrations()
+                          .get(req.getHttpServletMapping().getServletName()))
+                  .getClassName(),
+              false,
+              Thread.currentThread().getContextClassLoader());
+    } catch (ClassNotFoundException e) {
+      // This should not happen as servlet class should have already been validated by the container
+      throw new AssertionError(e);
+    }
+    return CallbackServlet.class.isAssignableFrom(servletClass)
+        || BackchannelLogoutServlet.class.isAssignableFrom(servletClass);
+  }
 
   @ForOverride
   protected void redirectToAuthenticationEndpoint(HttpServletRequest req, HttpServletResponse res)
