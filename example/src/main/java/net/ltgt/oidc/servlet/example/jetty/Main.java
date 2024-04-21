@@ -19,6 +19,7 @@ import net.ltgt.oidc.servlet.CallbackServlet;
 import net.ltgt.oidc.servlet.Configuration;
 import net.ltgt.oidc.servlet.HasRoleFilter;
 import net.ltgt.oidc.servlet.IsAuthenticatedFilter;
+import net.ltgt.oidc.servlet.KeycloakUserPrincipal;
 import net.ltgt.oidc.servlet.LoggedOutSessionStore;
 import net.ltgt.oidc.servlet.LoginServlet;
 import net.ltgt.oidc.servlet.LogoutCallbackServlet;
@@ -45,7 +46,8 @@ public class Main {
                 new Issuer(requireNonNull(System.getProperty("example.issuer")))),
             new ClientSecretBasic(
                 new ClientID(requireNonNull(System.getProperty("example.clientId"))),
-                new Secret(requireNonNull(System.getProperty("example.clientSecret")))));
+                new Secret(requireNonNull(System.getProperty("example.clientSecret")))),
+            KeycloakUserPrincipal::new);
 
     var server = new Server(Integer.getInteger("example.port", 8000));
 

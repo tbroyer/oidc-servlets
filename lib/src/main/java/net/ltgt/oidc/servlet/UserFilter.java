@@ -11,10 +11,13 @@ import java.security.Principal;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class UserFilter extends HttpFilter {
+  private Configuration configuration;
   private @Nullable LoggedOutSessionStore loggedOutSessionStore;
 
   @Override
   public void init() throws ServletException {
+    configuration =
+        (Configuration) getServletContext().getAttribute(Configuration.CONTEXT_ATTRIBUTE_NAME);
     loggedOutSessionStore =
         (LoggedOutSessionStore)
             getServletContext().getAttribute(LoggedOutSessionStore.CONTEXT_ATTRIBUTE_NAME);
@@ -41,7 +44,8 @@ public class UserFilter extends HttpFilter {
 
   private HttpServletRequest wrapRequest(HttpServletRequest req, SessionInfo sessionInfo) {
     return new HttpServletRequestWrapper(req) {
-      private final UserPrincipal userPrincipal = new UserPrincipal(sessionInfo);
+      private final UserPrincipal userPrincipal =
+          configuration.userPrincipalFactory().apply(sessionInfo);
 
       @Override
       public String getRemoteUser() {
