@@ -36,10 +36,10 @@ public class AuthenticationRedirector {
         new AuthenticationRequest.Builder(
             ResponseType.CODE,
             new Scope(OIDCScopeValue.OPENID, OIDCScopeValue.PROFILE, OIDCScopeValue.EMAIL),
-            configuration.clientAuthentication().getClientID(),
+            configuration.getClientAuthentication().getClientID(),
             URI.create(req.getRequestURL().toString()).resolve(callbackPath));
     authenticationRequestBuilder
-        .endpointURI(configuration.providerMetadata().getAuthorizationEndpointURI())
+        .endpointURI(configuration.getProviderMetadata().getAuthorizationEndpointURI())
         .state(state)
         .nonce(nonce)
         // From RFC: If the client is capable of using S256, it MUST use S256.

@@ -43,11 +43,12 @@ public class CallbackServlet extends HttpServlet {
     try {
       idTokenValidator =
           new IDTokenValidator(
-              configuration.providerMetadata().getIssuer(),
-              configuration.clientAuthentication().getClientID(),
+              configuration.getProviderMetadata().getIssuer(),
+              configuration.getClientAuthentication().getClientID(),
               new JWSVerificationKeySelector(
-                  Set.copyOf(configuration.providerMetadata().getIDTokenJWSAlgs()),
-                  JWKSourceBuilder.create(configuration.providerMetadata().getJWKSetURI().toURL())
+                  Set.copyOf(configuration.getProviderMetadata().getIDTokenJWSAlgs()),
+                  JWKSourceBuilder.create(
+                          configuration.getProviderMetadata().getJWKSetURI().toURL())
                       .build()),
               null);
     } catch (MalformedURLException e) {
@@ -104,8 +105,8 @@ public class CallbackServlet extends HttpServlet {
     var code = response.toSuccessResponse().getAuthorizationCode();
     var tokenRequest =
         new TokenRequest(
-            configuration.providerMetadata().getTokenEndpointURI(),
-            configuration.clientAuthentication(),
+            configuration.getProviderMetadata().getTokenEndpointURI(),
+            configuration.getClientAuthentication(),
             new AuthorizationCodeGrant(
                 code,
                 URI.create(req.getRequestURL().toString()),
@@ -142,7 +143,7 @@ public class CallbackServlet extends HttpServlet {
 
     var userInfoRequest =
         new UserInfoRequest(
-            configuration.providerMetadata().getUserInfoEndpointURI(),
+            configuration.getProviderMetadata().getUserInfoEndpointURI(),
             successResponse.getOIDCTokens().getAccessToken());
     UserInfoResponse userInfoResponse;
     try {

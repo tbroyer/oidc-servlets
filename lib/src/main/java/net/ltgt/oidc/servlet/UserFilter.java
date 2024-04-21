@@ -44,8 +44,7 @@ public class UserFilter extends HttpFilter {
 
   private HttpServletRequest wrapRequest(HttpServletRequest req, SessionInfo sessionInfo) {
     return new HttpServletRequestWrapper(req) {
-      private final UserPrincipal userPrincipal =
-          configuration.userPrincipalFactory().apply(sessionInfo);
+      private final UserPrincipal userPrincipal = configuration.createUserPrincipal(sessionInfo);
 
       @Override
       public String getRemoteUser() {

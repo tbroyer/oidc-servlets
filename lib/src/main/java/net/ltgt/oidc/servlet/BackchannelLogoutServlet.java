@@ -32,12 +32,13 @@ public class BackchannelLogoutServlet extends HttpServlet {
     try {
       logoutTokenValidator =
           new LogoutTokenValidator(
-              configuration.providerMetadata().getIssuer(),
-              configuration.clientAuthentication().getClientID(),
+              configuration.getProviderMetadata().getIssuer(),
+              configuration.getClientAuthentication().getClientID(),
               false, // XXX: make configurable?
               new JWSVerificationKeySelector(
-                  Set.copyOf(configuration.providerMetadata().getIDTokenJWSAlgs()),
-                  JWKSourceBuilder.create(configuration.providerMetadata().getJWKSetURI().toURL())
+                  Set.copyOf(configuration.getProviderMetadata().getIDTokenJWSAlgs()),
+                  JWKSourceBuilder.create(
+                          configuration.getProviderMetadata().getJWKSetURI().toURL())
                       .build()),
               null);
     } catch (MalformedURLException e) {
