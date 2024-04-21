@@ -1,6 +1,6 @@
-<%@ page import="net.ltgt.oidc.servlet.example.jetty.AbstractAuthorizationFilter" %>
-<%@ page import="net.ltgt.oidc.servlet.example.jetty.UserPrincipal" %>
-<%@ page import="net.ltgt.oidc.servlet.example.jetty.Utils" %>
+<%@ page import="net.ltgt.oidc.servlet.AbstractAuthorizationFilter" %>
+<%@ page import="net.ltgt.oidc.servlet.UserPrincipal" %>
+<%@ page import="net.ltgt.oidc.servlet.Utils" %>
 
 <% if (request.getUserPrincipal() instanceof UserPrincipal) { %>
 <p><%= ((UserPrincipal) request.getUserPrincipal()).sessionInfo().userInfo().getName() %>

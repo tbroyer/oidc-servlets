@@ -1,10 +1,10 @@
-package net.ltgt.oidc.servlet.example.jetty;
+package net.ltgt.oidc.servlet;
 
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.openid.connect.sdk.Nonce;
 
-public record AuthenticationState(
+record AuthenticationState(
     State state, //
     Nonce nonce,
     CodeVerifier codeVerifier,

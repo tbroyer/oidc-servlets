@@ -18,4 +18,6 @@ dependencyResolutionManagement {
     }
 }
 
-include("example")
+include("lib", "example")
+
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

@@ -4,14 +4,11 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.checkerQual)
-    implementation(libs.errorprone.annotations)
-    implementation(libs.nullaway.annotations)
+    implementation(projects.lib)
     implementation(platform(libs.jetty.bom))
     implementation(platform(libs.jetty.ee10.bom))
     implementation(libs.jetty.servlet)
     implementation(libs.jetty.jsp)
-    implementation(libs.nimbus.oidcSdk)
 }
 
 tasks {

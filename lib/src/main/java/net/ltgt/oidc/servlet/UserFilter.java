@@ -1,4 +1,4 @@
-package net.ltgt.oidc.servlet.example.jetty;
+package net.ltgt.oidc.servlet;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

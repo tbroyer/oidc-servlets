@@ -1,4 +1,4 @@
-package net.ltgt.oidc.servlet.example.jetty;
+package net.ltgt.oidc.servlet;
 
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.openid.connect.sdk.LogoutRequest;

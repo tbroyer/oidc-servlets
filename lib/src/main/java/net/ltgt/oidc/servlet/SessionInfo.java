@@ -1,4 +1,4 @@
-package net.ltgt.oidc.servlet.example.jetty;
+package net.ltgt.oidc.servlet;
 
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;

@@ -1,4 +1,4 @@
-package net.ltgt.oidc.servlet.example.jetty;
+package net.ltgt.oidc.servlet;
 
 import com.nimbusds.openid.connect.sdk.claims.SessionID;
 import java.util.Set;

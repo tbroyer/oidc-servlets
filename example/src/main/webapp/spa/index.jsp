@@ -1,5 +1,5 @@
 <%@ page session="false" %>
-<%@ page import="net.ltgt.oidc.servlet.example.jetty.UserPrincipal" %>
+<%@ page import="net.ltgt.oidc.servlet.UserPrincipal" %>
 <!doctype html>
 <html>
 <head>

@@ -1,4 +1,4 @@
-package net.ltgt.oidc.servlet.example.jetty;
+package net.ltgt.oidc.servlet;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.source.JWKSourceBuilder;

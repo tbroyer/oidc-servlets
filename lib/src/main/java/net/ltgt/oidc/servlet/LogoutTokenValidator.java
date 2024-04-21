@@ -14,7 +14,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package net.ltgt.oidc.servlet.example.jetty;
+package net.ltgt.oidc.servlet;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;

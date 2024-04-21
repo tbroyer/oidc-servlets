@@ -12,6 +12,7 @@ ktlint = "1.2.1"
 checkerQual = "org.checkerframework:checker-qual:3.42.0"
 errorprone-annotations = { module = "com.google.errorprone:error_prone_annotations", version.ref = "errorprone" }
 errorprone-typeAnnotations = { module = "com.google.errorprone:error_prone_type_annotations", version.ref = "errorprone" }
+jakarta-servletApi = "jakarta.servlet:jakarta.servlet-api:6.0.0"
 jetty-bom = { module = "org.eclipse.jetty:jetty-bom", version.ref = "jetty" }
 jetty-ee10-bom = { module = "org.eclipse.jetty.ee10:jetty-ee10-bom", version.ref = "jetty" }
 jetty-jsp = { module = "org.eclipse.jetty.ee10:jetty-ee10-apache-jsp" }
