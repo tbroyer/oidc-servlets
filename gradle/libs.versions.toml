@@ -32,5 +32,6 @@ errorprone = [ "errorprone-core", "nullaway" ]
 errorprone = "net.ltgt.errorprone:3.1.0"
 forbiddenapis = "de.thetaphi.forbiddenapis:3.7"
 jvmDependencyConflictResolution = "org.gradlex.jvm-dependency-conflict-resolution:2.0"
+nexusPublish = "io.github.gradle-nexus.publish-plugin:2.0.0"
 nullaway = "net.ltgt.nullaway:2.0.0"
 spotless = "com.diffplug.spotless:6.25.0"
