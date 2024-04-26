@@ -17,6 +17,16 @@ import java.text.ParseException;
 import java.util.Set;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Implements the OpenID Connect Back-Channel Logout URI.
+ *
+ * <p>This servlet must not be protected by authentication or CSRF protections. A {@link
+ * LoggedOutSessionStore} instance must have been added as a {@link jakarta.servlet.ServletContext
+ * ServletContext} attribute under the name {@link LoggedOutSessionStore#CONTEXT_ATTRIBUTE_NAME}.
+ *
+ * @see <a href="https://openid.net/specs/openid-connect-backchannel-1_0.html">OpenID Connect
+ *     Back-Channel Logout 1.0</a>
+ */
 public class BackchannelLogoutServlet extends HttpServlet {
   private LoggedOutSessionStore loggedOutSessionStore;
   private LogoutTokenValidator logoutTokenValidator;
