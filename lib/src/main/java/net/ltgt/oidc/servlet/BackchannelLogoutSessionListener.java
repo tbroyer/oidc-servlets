@@ -26,8 +26,8 @@ public class BackchannelLogoutSessionListener implements HttpSessionListener {
                 .getAttribute(LoggedOutSessionStore.CONTEXT_ATTRIBUTE_NAME);
     if (sessionInfo != null
         && loggedOutSessionStore != null
-        && sessionInfo.idTokenClaims().getSessionID() != null) {
-      loggedOutSessionStore.forget(sessionInfo.idTokenClaims().getSessionID());
+        && sessionInfo.getIDTokenClaims().getSessionID() != null) {
+      loggedOutSessionStore.forget(sessionInfo.getIDTokenClaims().getSessionID());
     }
   }
 }

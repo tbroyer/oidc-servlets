@@ -14,7 +14,7 @@ public class KeycloakUserPrincipal implements UserPrincipal {
   @SuppressWarnings("unchecked")
   public boolean hasRole(String role) {
     // Look into Keycloak-specific role properties
-    return Optional.ofNullable(sessionInfo.userInfo().getJSONObjectClaim("realm_access"))
+    return Optional.ofNullable(sessionInfo.getUserInfo().getJSONObjectClaim("realm_access"))
         .map(realmAccess -> (Collection<String>) realmAccess.get("roles"))
         .map(roles -> roles.contains(role))
         .orElse(false);

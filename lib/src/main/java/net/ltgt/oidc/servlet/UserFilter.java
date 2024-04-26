@@ -31,8 +31,8 @@ public class UserFilter extends HttpFilter {
       var sessionInfo = (SessionInfo) session.getAttribute(SessionInfo.SESSION_ATTRIBUTE_NAME);
       if (sessionInfo != null) {
         if (loggedOutSessionStore != null
-            && sessionInfo.idTokenClaims().getSessionID() != null
-            && loggedOutSessionStore.isLoggedOut(sessionInfo.idTokenClaims().getSessionID())) {
+            && sessionInfo.getIDTokenClaims().getSessionID() != null
+            && loggedOutSessionStore.isLoggedOut(sessionInfo.getIDTokenClaims().getSessionID())) {
           session.invalidate();
         } else {
           req = wrapRequest(req, sessionInfo);

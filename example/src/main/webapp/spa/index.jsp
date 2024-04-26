@@ -7,7 +7,7 @@
     <script>
     <%-- XXX: use proper JSON library --%>
     const user = {
-        "name": "<%= ((UserPrincipal) request.getUserPrincipal()).getSessionInfo().userInfo().getName() %>",
+        "name": "<%= ((UserPrincipal) request.getUserPrincipal()).getSessionInfo().getUserInfo().getName() %>",
         "admin": <%= request.isUserInRole("admin") %>
     };
     </script>
