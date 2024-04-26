@@ -2,6 +2,7 @@ package net.ltgt.oidc.servlet;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+/** Ensures the user {@linkplain HttpServletRequest#getUserPrincipal is authenticated}. */
 public class IsAuthenticatedFilter extends AbstractAuthorizationFilter {
 
   @Override
