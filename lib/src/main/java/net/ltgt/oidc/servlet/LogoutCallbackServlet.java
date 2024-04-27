@@ -9,6 +9,20 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * Implements a post-logout redirect URI for use with <a
+ * href="https://openid.net/specs/openid-connect-rpinitiated-1_0.html">OpenID Connect RP-Initiated
+ * Logout</a>
+ *
+ * <p>Logout state must have been put in the {@linkplain jakarta.servlet.http.HttpSession session}
+ * by the {@link LogoutServlet}.
+ *
+ * <p>After validating the request, the user will be redirected to the page stored in the logout
+ * state.
+ *
+ * @see <a href="https://openid.net/specs/openid-connect-rpinitiated-1_0.html">OpenID Connect
+ *     RP-Initiated Logout 1.0</a>
+ */
 public class LogoutCallbackServlet extends HttpServlet {
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)

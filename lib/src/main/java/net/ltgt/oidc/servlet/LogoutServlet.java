@@ -10,6 +10,23 @@ import java.io.IOException;
 import java.net.URI;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * This servlet starts the logout workflow and possibly redirects back to a given URL afterward.
+ *
+ * <p>The post-logout redirection is conditioned to configuration of a {@link
+ * #POST_LOGOUT_REDIRECT_PATH} init parameter. This should be a public page, otherwise the user will
+ * directly be sent back to the OpenID Provider for signing in again, and it should be properly
+ * registered at the OpenID Provider in the {@code post_logout_redirect_uris} client metadata.
+ *
+ * <p>If this post-logout redirect path is a {@link LogoutCallbackServlet}, this should be indicated
+ * with a {@link #USE_LOGOUT_STATE} init parameter with the value {@code true}. The final redirect
+ * target will have to be sent as a {@link Utils#RETURN_TO_PARAMETER_NAME} form parameter. It should
+ * be given as an absolute path (possibly with a query string), though a full URL would be accepted
+ * as long as it's the same <a href="https://datatracker.ietf.org/doc/html/rfc6454">origin</a>.
+ *
+ * @see <a href="https://openid.net/specs/openid-connect-rpinitiated-1_0.html">OpenID Connect
+ *     RP-Initiated Logout 1.0</a>
+ */
 public class LogoutServlet extends HttpServlet {
   public static final String POST_LOGOUT_REDIRECT_PATH = "post-logout-redirect-path";
   public static final String USE_LOGOUT_STATE = "use-logout-state";
@@ -20,10 +37,24 @@ public class LogoutServlet extends HttpServlet {
 
   public LogoutServlet() {}
 
+  /**
+   * Constructs a logout servlet with the given post-logout redirect path.
+   *
+   * <p>When this constructor is used, <i>logout state</i> won't be used, and the init parameters
+   * won't be read.
+   *
+   * <p>This is equivalent to {@code new LogoutServlet(postLogoutRedirectPath, false)}.
+   */
   public LogoutServlet(String postLogoutRedirectPath) {
     this(postLogoutRedirectPath, false);
   }
 
+  /**
+   * Constructs a logout servlet with the given post-logout redirect path and whether to use
+   * <i>logout state</i>.
+   *
+   * <p>When this constructor is used, the init parameters won't be read.
+   */
   public LogoutServlet(String postLogoutRedirectPath, boolean useLogoutState) {
     this.postLogoutRedirectPath = postLogoutRedirectPath;
     this.useLogoutState = useLogoutState;
