@@ -8,6 +8,16 @@ import java.net.URI;
 
 public class Utils {
 
+  /**
+   * The name of the form parameter to pass a page's path to return to after login or logout.
+   *
+   * <p>The target page should be given as an absolute path (possibly with a query string), though a
+   * full URL would be accepted as long as it's the same <a
+   * href="https://datatracker.ietf.org/doc/html/rfc6454">origin</a>.
+   *
+   * @see LoginServlet
+   * @see LogoutServlet
+   */
   public static final String RETURN_TO_PARAMETER_NAME = "return-to";
 
   private Utils() {
@@ -24,6 +34,7 @@ public class Utils {
     res.setStatus(HttpServletResponse.SC_SEE_OTHER);
   }
 
+  /** Returns whether the request is a navigation request. */
   static boolean isNavigation(HttpServletRequest req) {
     var fetchMode = req.getHeader("Sec-Fetch-Mode");
     // Sec-Fetch-Mode is only supported starting with Safari 16.4, so allow if absent
@@ -31,10 +42,12 @@ public class Utils {
     return fetchMode == null || fetchMode.equals("navigate");
   }
 
+  /** Returns whether the request uses a safe method. */
   static boolean isSafeMethod(HttpServletRequest req) {
     return req.getMethod().equalsIgnoreCase("GET") || req.getMethod().equalsIgnoreCase("HEAD");
   }
 
+  /** Returns whether the request is <i>same origin</i>. */
   static boolean isSameOrigin(HttpServletRequest req) {
     var fetchSite = req.getHeader("Sec-Fetch-Site");
     // Sec-Fetch-Site is only supported starting with Safari 16.4, so fallback if absent
@@ -56,6 +69,11 @@ public class Utils {
     return req.getRequestURL().toString().startsWith(actualOrigin);
   }
 
+  /**
+   * Returns the {@link #RETURN_TO_PARAMETER_NAME} form parameter, validated and made relative to
+   * the server root, or {@code /} as a fallback value (when the parameter is absent or has a
+   * different <a href="https://datatracker.ietf.org/doc/html/rfc645">origin</a>.
+   */
   static String getReturnToParameter(HttpServletRequest req) {
     var returnTo = req.getParameter(RETURN_TO_PARAMETER_NAME);
     if (returnTo == null) {
@@ -70,6 +88,10 @@ public class Utils {
     return "/" + relativized.toASCIIString();
   }
 
+  /**
+   * Returns the request's path and query-string, taking into account {@linkplain
+   * RequestDispatcher#forward forwarded} requests to return the origin request URI.
+   */
   public static String getRequestUri(HttpServletRequest req) {
     String requestUri, queryString;
     if (req.getDispatcherType() == DispatcherType.FORWARD) {
