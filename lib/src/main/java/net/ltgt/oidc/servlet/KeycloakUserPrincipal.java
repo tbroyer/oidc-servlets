@@ -3,6 +3,7 @@ package net.ltgt.oidc.servlet;
 import java.util.Collection;
 import java.util.Optional;
 
+/** A {@link UserPrincipal} that extracts Keycloak <i>realm</i> roles from the user information. */
 public class KeycloakUserPrincipal implements UserPrincipal {
   private final SessionInfo sessionInfo;
 

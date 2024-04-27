@@ -10,6 +10,21 @@ import java.io.IOException;
 import java.security.Principal;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Checks whether the user is authenticated.
+ *
+ * <p>Initializes the request's {@link HttpServletRequest#getUserPrincipal() getUserPrincipal()} and
+ * {@link HttpServletRequest#getRemoteUser() getRemoteUser()}, and implements its {@link
+ * HttpServletRequest#isUserInRole isUserInRole(String)} for other filters and servlets down the
+ * chain. The user principal will be created by the {@linkplain Configuration#createUserPrincipal
+ * configuration} present in the {@link jakarta.servlet.ServletContext ServletContext}.
+ *
+ * <p>Invalidates the {@link jakarta.servlet.http.HttpSession HttpSession} if a {@link
+ * LoggedOutSessionStore} is present in the {@code ServletContext} and the session has been recorded
+ * as logged out on the OpenID Provider through the OpenID Connect Back-Channel Logout protocol.
+ *
+ * @see BackchannelLogoutServlet
+ */
 public class UserFilter extends HttpFilter {
   private Configuration configuration;
   private @Nullable LoggedOutSessionStore loggedOutSessionStore;

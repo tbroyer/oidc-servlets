@@ -16,6 +16,8 @@ import java.io.IOException;
  * should be given as an absolute path (possibly with a query string), though a full URL would be
  * accepted as long as it's the same <a
  * href="https://datatracker.ietf.org/doc/html/rfc6454">origin</a>.
+ *
+ * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html">OpenID Connect Core 1.0</a>
  */
 public class LoginServlet extends HttpServlet {
   private AuthenticationRedirector authenticationRedirector;

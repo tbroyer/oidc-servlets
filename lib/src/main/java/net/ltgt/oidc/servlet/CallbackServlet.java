@@ -1,5 +1,6 @@
 package net.ltgt.oidc.servlet;
 
+import com.google.errorprone.annotations.ForOverride;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.source.JWKSourceBuilder;
 import com.nimbusds.jose.proc.BadJOSEException;
@@ -30,6 +31,24 @@ import java.util.Optional;
 import java.util.Set;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * Implements the OpenID Connect Redirect URI for the <a
+ * href="https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth">authorization code
+ * flow</a>.
+ *
+ * <p>A {@link Configuration} instance must have been added as a {@link
+ * jakarta.servlet.ServletContext ServletContext} attribute under the name {@link
+ * Configuration#CONTEXT_ATTRIBUTE_NAME}.
+ *
+ * <p>Authentication state must have been put in the {@linkplain jakarta.servlet.http.HttpSession
+ * session} by an {@link AuthenticationRedirector} (generally through the {@link LoginServlet} or an
+ * {@linkplain AbstractAuthorizationFilter authorization filter}).
+ *
+ * <p>After validating the request, and if authentication was successful, the user will be
+ * redirected to the page stored in the authentication state.
+ *
+ * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html">OpenID Connect Core 1.0</a>
+ */
 public class CallbackServlet extends HttpServlet {
 
   private Configuration configuration;
@@ -182,9 +201,10 @@ public class CallbackServlet extends HttpServlet {
     Utils.sendRedirect(resp, authenticationState.requestUri());
   }
 
-  private void sendError(
+  @ForOverride
+  protected void sendError(
       HttpServletResponse resp, int statusCode, String message, @Nullable Throwable cause)
-      throws IOException {
+      throws IOException, ServletException {
     if (cause != null) {
       log(message, cause);
     }

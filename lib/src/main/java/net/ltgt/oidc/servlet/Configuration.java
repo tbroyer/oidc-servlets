@@ -4,6 +4,14 @@ import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.openid.connect.sdk.op.ReadOnlyOIDCProviderMetadata;
 import java.util.function.Function;
 
+/**
+ * Contains the OpenID Connect-related configuration.
+ *
+ * <p>An instance of this class needs to be registered as a {@link jakarta.servlet.ServletContext
+ * ServletContext} attribute under the name {@link #CONTEXT_ATTRIBUTE_NAME}.
+ *
+ * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html">OpenID Connect Core 1.0</a>
+ */
 public class Configuration {
   public static final String CONTEXT_ATTRIBUTE_NAME = Configuration.class.getName();
 
@@ -20,6 +28,7 @@ public class Configuration {
     this.userPrincipalFactory = userPrincipalFactory;
   }
 
+  /** Constructs a configuration instance that creates instances of {@link SimpleUserPrincipal}. */
   public Configuration(
       ReadOnlyOIDCProviderMetadata providerMetadata, ClientAuthentication clientAuthentication) {
     this(providerMetadata, clientAuthentication, SimpleUserPrincipal::new);
