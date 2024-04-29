@@ -18,6 +18,7 @@ import net.ltgt.oidc.servlet.BackchannelLogoutSessionListener;
 import net.ltgt.oidc.servlet.CallbackServlet;
 import net.ltgt.oidc.servlet.Configuration;
 import net.ltgt.oidc.servlet.HasRoleFilter;
+import net.ltgt.oidc.servlet.InMemoryLoggedOutSessionStore;
 import net.ltgt.oidc.servlet.IsAuthenticatedFilter;
 import net.ltgt.oidc.servlet.KeycloakUserPrincipal;
 import net.ltgt.oidc.servlet.LoggedOutSessionStore;
@@ -61,7 +62,7 @@ public class Main {
         AuthenticationRedirector.CONTEXT_ATTRIBUTE_NAME,
         new AuthenticationRedirector(configuration, CALLBACK_PATH));
     contextHandler.setAttribute(
-        LoggedOutSessionStore.CONTEXT_ATTRIBUTE_NAME, new LoggedOutSessionStore());
+        LoggedOutSessionStore.CONTEXT_ATTRIBUTE_NAME, new InMemoryLoggedOutSessionStore());
 
     contextHandler.addEventListener(new BackchannelLogoutSessionListener());
 

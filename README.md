@@ -177,7 +177,7 @@ To use [OpenID Connect Back-Channel Logout](https://openid.net/specs/openid-conn
 ```java
 // Using the ServletContext dynamic registration (e.g. from ServletContextInitializer)
 servletContext.setAttribute(
-    LoggedOutSessionStore.CONTEXT_ATTRIBUTE_NAME, new LoggedOutSessionStore());
+    LoggedOutSessionStore.CONTEXT_ATTRIBUTE_NAME, new InMemoryLoggedOutSessionStore());
 servletContext.addListener(new BackchannelLogoutSessionListener());
 servletContext.addServlet("backchannel-logout", BackchannelLogoutServlet.class)
     .addMapping("/backchannel-logout");

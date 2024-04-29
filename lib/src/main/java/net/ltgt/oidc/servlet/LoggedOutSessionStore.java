@@ -1,8 +1,6 @@
 package net.ltgt.oidc.servlet;
 
 import com.nimbusds.openid.connect.sdk.claims.SessionID;
-import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  * Tracks {@link SessionID} values of sessions logged out with the OpenID Connect Back-Channel
@@ -13,25 +11,30 @@ import java.util.concurrent.ConcurrentSkipListSet;
  * BackchannelLogoutSessionListener} is responsible for notifying this store so the {@code
  * SessionID} can be forgotten (to prevent the store growing indefinitely).
  *
+ * <p>Implementations could also directly invalidate the session if possible, rather than only
+ * marking it as logged out to later be invalidated by the {@code UserFilter}. In this case, the
+ * {@code BackchannelLogoutSessionListener} might not be necessary.
+ *
+ * @see InMemoryLoggedOutSessionStore
  * @see UserFilter
  * @see BackchannelLogoutServlet
  * @see BackchannelLogoutSessionListener
  * @see <a href="https://openid.net/specs/openid-connect-backchannel-1_0.html">OpenID Connect
  *     Back-Channel Logout 1.0</a>
  */
-public class LoggedOutSessionStore {
-  public static final String CONTEXT_ATTRIBUTE_NAME = LoggedOutSessionStore.class.getName();
-
-  private final Set<SessionID> loggedOutSessions = new ConcurrentSkipListSet<>();
+public interface LoggedOutSessionStore {
+  String CONTEXT_ATTRIBUTE_NAME = LoggedOutSessionStore.class.getName();
 
   /**
    * Records the given session ID as having been logged out at the OpenID Provider.
    *
+   * <p>Implementations could also directly invalidate the session if possible, rather than only
+   * marking it as logged out to later be invalidated by the {@code UserFilter}. In this case, the
+   * {@code BackchannelLogoutSessionListener} might not be necessary.
+   *
    * @see BackchannelLogoutServlet
    */
-  public void logout(SessionID sessionID) {
-    loggedOutSessions.add(sessionID);
-  }
+  void logout(SessionID sessionID);
 
   /**
    * Returns whether the given session ID has been logged out.
@@ -39,9 +42,7 @@ public class LoggedOutSessionStore {
    * @see #logout
    * @see UserFilter
    */
-  public boolean isLoggedOut(SessionID sessionID) {
-    return loggedOutSessions.contains(sessionID);
-  }
+  boolean isLoggedOut(SessionID sessionID);
 
   /**
    * Forgets about the given session ID.
@@ -51,7 +52,5 @@ public class LoggedOutSessionStore {
    *
    * @see BackchannelLogoutSessionListener
    */
-  public void forget(SessionID sessionID) {
-    loggedOutSessions.remove(sessionID);
-  }
+  void forget(SessionID sessionID);
 }
