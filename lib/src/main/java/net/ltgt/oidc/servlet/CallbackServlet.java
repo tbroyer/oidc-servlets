@@ -97,9 +97,13 @@ public class CallbackServlet extends HttpServlet {
     var authenticationState =
         Optional.ofNullable(req.getSession(false))
             .map(
-                session ->
-                    (AuthenticationState)
-                        session.getAttribute(AuthenticationState.SESSION_ATTRIBUTE_NAME))
+                session -> {
+                  var state =
+                      (AuthenticationState)
+                          session.getAttribute(AuthenticationState.SESSION_ATTRIBUTE_NAME);
+                  session.removeAttribute(AuthenticationState.SESSION_ATTRIBUTE_NAME);
+                  return state;
+                })
             .orElse(null);
     if (authenticationState == null) {
       sendError(

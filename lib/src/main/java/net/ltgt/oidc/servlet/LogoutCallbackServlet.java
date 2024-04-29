@@ -39,7 +39,13 @@ public class LogoutCallbackServlet extends HttpServlet {
     var stateParam = State.parse(req.getParameter("state"));
     var logoutState =
         Optional.ofNullable(req.getSession(false))
-            .map(session -> (LogoutState) session.getAttribute(LogoutState.SESSION_ATTRIBUTE_NAME))
+            .map(
+                session -> {
+                  var state =
+                      (LogoutState) session.getAttribute(LogoutState.SESSION_ATTRIBUTE_NAME);
+                  session.removeAttribute(LogoutState.SESSION_ATTRIBUTE_NAME);
+                  return state;
+                })
             .orElse(null);
     if (logoutState == null) {
       // XXX: redirect to home page instead?
