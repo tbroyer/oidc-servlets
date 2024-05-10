@@ -48,7 +48,7 @@
       "/callback"
     ],
     "attributes":{
-      "post.logout.redirect.uris": "/logout_callback",
+      "post.logout.redirect.uris": "/logout_callback##/",
       "backchannel.logout.url": "$(env:APP_BACKCHANNEL_BASE_URL:-$(env:APP_BASE_URL))/backchannel-logout",
       "backchannel.logout.session.required": "true"
     },
