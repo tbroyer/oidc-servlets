@@ -7,6 +7,7 @@ import com.nimbusds.jose.proc.JWSVerificationKeySelector;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.openid.connect.sdk.claims.LogoutTokenClaimsSet;
+import com.nimbusds.openid.connect.sdk.validators.LogoutTokenValidator;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
