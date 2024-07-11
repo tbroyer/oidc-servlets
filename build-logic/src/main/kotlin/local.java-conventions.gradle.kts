@@ -41,7 +41,7 @@ tasks.withType<JavaCompile>().configureEach {
     options.compilerArgs.addAll(arrayOf("-Werror", "-Xlint:all,-fallthrough,-serial"))
     options.errorprone {
         nullaway {
-            knownInitializers.appendAll(
+            knownInitializers.addAll(
                 "jakarta.servlet.Servlet.init",
                 "jakarta.servlet.GenericServlet.init",
                 "jakarta.servlet.Filter.init",
