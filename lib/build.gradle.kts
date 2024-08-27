@@ -8,7 +8,6 @@ plugins {
 dependencies {
     api(libs.jspecify)
     api(libs.errorprone.annotations)
-    compileOnlyApi(libs.nullaway.annotations)
     api(libs.nimbus.oidcSdk)
     api(libs.jakarta.servletApi)
 }
