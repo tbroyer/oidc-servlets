@@ -33,7 +33,6 @@ errorprone = [ "errorprone-core", "nullaway" ]
 
 [plugins]
 errorprone = "net.ltgt.errorprone:4.0.1"
-forbiddenapis = "de.thetaphi.forbiddenapis:3.7"
 jvmDependencyConflictResolution = "org.gradlex.jvm-dependency-conflict-resolution:2.1.2"
 nexusPublish = "io.github.gradle-nexus.publish-plugin:2.0.0"
 nullaway = "net.ltgt.nullaway:2.0.0"

@@ -7,7 +7,6 @@ dependencies {
     implementation(plugin(libs.plugins.spotless))
     implementation(plugin(libs.plugins.errorprone))
     implementation(plugin(libs.plugins.nullaway))
-    implementation(plugin(libs.plugins.forbiddenapis))
     implementation(plugin(libs.plugins.jvmDependencyConflictResolution))
 }
 

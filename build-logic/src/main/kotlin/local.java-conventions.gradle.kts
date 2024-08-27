@@ -6,7 +6,6 @@ plugins {
     `java-base`
     id("net.ltgt.errorprone")
     id("net.ltgt.nullaway")
-    id("de.thetaphi.forbiddenapis")
     id("org.gradlex.jvm-dependency-conflict-resolution")
 }
 
@@ -16,10 +15,6 @@ dependencies {
 
 nullaway {
     annotatedPackages.add("net.ltgt.oidc")
-}
-
-forbiddenApis {
-    bundledSignatures = setOf("jdk-unsafe", "jdk-deprecated", "jdk-internal", "jdk-non-portable", "jdk-system-out")
 }
 
 java {
@@ -40,6 +35,7 @@ tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
     options.compilerArgs.addAll(arrayOf("-Werror", "-Xlint:all,-fallthrough,-serial"))
     options.errorprone {
+        enable("DefaultLocale")
         nullaway {
             knownInitializers.addAll(
                 "jakarta.servlet.Servlet.init",
