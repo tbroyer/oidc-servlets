@@ -29,7 +29,7 @@ import java.net.URI;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Implements the OpenID Connect Redirect URI for the <a

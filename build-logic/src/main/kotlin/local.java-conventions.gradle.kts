@@ -37,6 +37,7 @@ tasks.withType<JavaCompile>().configureEach {
     options.errorprone {
         enable("DefaultLocale")
         nullaway {
+            isJSpecifyMode = true
             knownInitializers.addAll(
                 "jakarta.servlet.Servlet.init",
                 "jakarta.servlet.GenericServlet.init",

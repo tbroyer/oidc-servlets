@@ -6,7 +6,7 @@ plugins {
 }
 
 dependencies {
-    api(libs.checkerQual)
+    api(libs.jspecify)
     api(libs.errorprone.annotations)
     compileOnlyApi(libs.nullaway.annotations)
     api(libs.nimbus.oidcSdk)
