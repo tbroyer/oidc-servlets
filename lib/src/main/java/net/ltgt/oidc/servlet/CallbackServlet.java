@@ -127,13 +127,14 @@ public class CallbackServlet extends HttpServlet {
     }
     var code = response.toSuccessResponse().getAuthorizationCode();
     var tokenRequest =
-        new TokenRequest(
-            configuration.getProviderMetadata().getTokenEndpointURI(),
-            configuration.getClientAuthentication(),
-            new AuthorizationCodeGrant(
-                code,
-                URI.create(req.getRequestURL().toString()),
-                authenticationState.codeVerifier()));
+        new TokenRequest.Builder(
+                configuration.getProviderMetadata().getTokenEndpointURI(),
+                configuration.getClientAuthentication(),
+                new AuthorizationCodeGrant(
+                    code,
+                    URI.create(req.getRequestURL().toString()),
+                    authenticationState.codeVerifier()))
+            .build();
     TokenResponse tokenResponse;
     try {
       tokenResponse = OIDCTokenResponseParser.parse(tokenRequest.toHTTPRequest().send());

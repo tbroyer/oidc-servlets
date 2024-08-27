@@ -1,16 +1,16 @@
 # Try to maintain entries sorted alphabetically inside each "group".
 [versions]
-errorprone = "2.26.1"
-jetty = "12.0.8"
-junitJupiter = "5.10.2"
-nullaway = "0.10.25"
+errorprone = "2.31.0"
+jetty = "12.0.12"
+junitJupiter = "5.11.0"
+nullaway = "0.11.2"
 
 # Versions used in build-logic
-googleJavaFormat = "1.22.0"
-ktlint = "1.2.1"
+googleJavaFormat = "1.23.0"
+ktlint = "1.3.1"
 
 [libraries]
-checkerQual = "org.checkerframework:checker-qual:3.42.0"
+checkerQual = "org.checkerframework:checker-qual:3.46.0"
 errorprone-annotations = { module = "com.google.errorprone:error_prone_annotations", version.ref = "errorprone" }
 errorprone-typeAnnotations = { module = "com.google.errorprone:error_prone_type_annotations", version.ref = "errorprone" }
 jakarta-servletApi = "jakarta.servlet:jakarta.servlet-api:6.0.0"
@@ -18,10 +18,10 @@ jetty-bom = { module = "org.eclipse.jetty:jetty-bom", version.ref = "jetty" }
 jetty-ee10-bom = { module = "org.eclipse.jetty.ee10:jetty-ee10-bom", version.ref = "jetty" }
 jetty-jsp = { module = "org.eclipse.jetty.ee10:jetty-ee10-apache-jsp" }
 jetty-servlet = { module = "org.eclipse.jetty.ee10:jetty-ee10-servlet" }
-nimbus-oidcSdk = "com.nimbusds:oauth2-oidc-sdk:11.12"
+nimbus-oidcSdk = "com.nimbusds:oauth2-oidc-sdk:11.19"
 nullaway-annotations = { module = "com.uber.nullaway:nullaway-annotations", version.ref = "nullaway" }
-selenium = "org.seleniumhq.selenium:selenium-java:4.20.0"
-truth = "com.google.truth:truth:1.4.2"
+selenium = "org.seleniumhq.selenium:selenium-java:4.24.0"
+truth = "com.google.truth:truth:1.4.4"
 
 # Used in bundle below
 errorprone-core = { module = "com.google.errorprone:error_prone_core", version.ref = "errorprone" }
@@ -32,9 +32,9 @@ nullaway = { module = "com.uber.nullaway:nullaway", version.ref = "nullaway" }
 errorprone = [ "errorprone-core", "nullaway" ]
 
 [plugins]
-errorprone = "net.ltgt.errorprone:3.1.0"
+errorprone = "net.ltgt.errorprone:4.0.1"
 forbiddenapis = "de.thetaphi.forbiddenapis:3.7"
-jvmDependencyConflictResolution = "org.gradlex.jvm-dependency-conflict-resolution:2.0"
+jvmDependencyConflictResolution = "org.gradlex.jvm-dependency-conflict-resolution:2.1.2"
 nexusPublish = "io.github.gradle-nexus.publish-plugin:2.0.0"
 nullaway = "net.ltgt.nullaway:2.0.0"
 spotless = "com.diffplug.spotless:6.25.0"
