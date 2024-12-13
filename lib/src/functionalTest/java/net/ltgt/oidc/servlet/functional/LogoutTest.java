@@ -2,7 +2,9 @@ package net.ltgt.oidc.servlet.functional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static net.ltgt.oidc.servlet.functional.Helpers.login;
+import static org.openqa.selenium.support.ui.ExpectedConditions.stalenessOf;
 
+import java.time.Duration;
 import net.ltgt.oidc.servlet.LoginServlet;
 import net.ltgt.oidc.servlet.LogoutCallbackServlet;
 import net.ltgt.oidc.servlet.LogoutServlet;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class LogoutTest {
 
@@ -40,7 +43,9 @@ public class LogoutTest {
 
       assertThat(driver.getCurrentUrl()).isEqualTo(server.getURI("/other.html"));
 
-      driver.findElement(By.id("logout")).click();
+      var logout = driver.findElement(By.id("logout"));
+      logout.click();
+      new WebDriverWait(driver, Duration.ofSeconds(2)).until(stalenessOf(logout));
 
       assertThat(driver.getCurrentUrl()).isEqualTo(server.getURI("/"));
     }
@@ -74,7 +79,9 @@ public class LogoutTest {
 
       assertThat(driver.getCurrentUrl()).isEqualTo(server.getURI("/"));
 
-      driver.findElement(By.id("logout")).click();
+      var logout = driver.findElement(By.id("logout"));
+      logout.click();
+      new WebDriverWait(driver, Duration.ofSeconds(2)).until(stalenessOf(logout));
 
       assertThat(driver.getCurrentUrl()).isEqualTo(server.getURI("/other.html"));
     }
