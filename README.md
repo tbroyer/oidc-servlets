@@ -43,6 +43,8 @@ The server listens on http://localhost:8000/.
 
 ## Usage
 
+Add a dependency on [`net.ltgt.oidc:oidc-servlets`](https://central.sonatype.com/artifact/net.ltgt.oidc/oidc-servlets).
+
 Create `Configuration` and `AuthenticatorRedirector` objects and add them as `ServletContext` attributes (the attribute names are in the `CONTEXT_ATTRIBUTE_NAME` static constants of each class):
 
 ```java
