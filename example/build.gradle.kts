@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    implementation(projects.lib)
+    implementation(projects.oidcServlets)
     implementation(platform(libs.jetty.bom))
     implementation(platform(libs.jetty.ee10.bom))
     implementation(libs.jetty.servlet)

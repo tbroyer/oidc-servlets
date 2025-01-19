@@ -1,4 +1,4 @@
-rootProject.name = "oidc-servlets"
+rootProject.name = "oidc-servlets-parent"
 
 pluginManagement {
     includeBuild("build-logic")
@@ -12,5 +12,7 @@ dependencyResolutionManagement {
 }
 
 include("lib", "example")
+
+project(":lib").name = "oidc-servlets"
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

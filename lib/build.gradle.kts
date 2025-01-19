@@ -1,8 +1,7 @@
 plugins {
     id("local.java-conventions")
+    id("local.maven-publish-conventions")
     `java-library`
-    `maven-publish`
-    signing
 }
 
 dependencies {
@@ -41,11 +40,6 @@ testing {
     }
 }
 
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
-
 tasks {
     javadoc {
         title = "OIDC Servlets API"
@@ -54,55 +48,11 @@ tasks {
 
 publishing {
     publications {
-        create<MavenPublication>("mavenJava") {
-            from(components["java"])
-
-            versionMapping {
-                usage("java-api") {
-                    fromResolutionOf("runtimeClasspath")
-                }
-                usage("java-runtime") {
-                    fromResolutionResult()
-                }
-            }
-
-            groupId = "net.ltgt.oidc"
-            artifactId = "oidc-servlets"
-            if (isSnapshot) {
-                version = "HEAD-SNAPSHOT"
-            }
-
+        withType<MavenPublication>().configureEach {
             pom {
                 name = "OIDC Servlets"
                 description = "Servlets implementing OpenID Connect, through the Nimbus SDK"
-                url = "https://github.com/tbroyer/oidc-servlets"
-                licenses {
-                    license {
-                        name = "The Apache License, Version 2.0"
-                        url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
-                    }
-                }
-                developers {
-                    developer {
-                        name = "Thomas Broyer"
-                        email = "t.broyer@ltgt.net"
-                    }
-                }
-                scm {
-                    connection = "https://github.com/tbroyer/oidc-servlets.git"
-                    developerConnection = "scm:git:ssh://github.com:tbroyer/oidc-servlets.git"
-                    url = "https://github.com/tbroyer/oidc-servlets"
-                }
             }
         }
     }
 }
-
-signing {
-    useGpgCmd()
-    isRequired = !isSnapshot
-    sign(publishing.publications["mavenJava"])
-}
-
-inline val Project.isSnapshot
-    get() = version == Project.DEFAULT_VERSION
