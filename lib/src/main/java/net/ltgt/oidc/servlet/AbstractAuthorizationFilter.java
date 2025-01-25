@@ -91,18 +91,32 @@ public abstract class AbstractAuthorizationFilter extends HttpFilter {
    * This method is called whenever the user is not authorized and the request is a {@linkplain
    * Utils#isSafeMethod safe} {@linkplain Utils#isNavigation navigation} request.
    *
+   * <p>This implementation calls {@link #sendForbidden} whenever the user is authenticated, and
+   * defers to {@link #doRedirectToAuthenticationEndpoint} otherwise.
+   */
+  @ForOverride
+  protected void redirectToAuthenticationEndpoint(HttpServletRequest req, HttpServletResponse res)
+      throws IOException, ServletException {
+    if (req.getUserPrincipal() == null) {
+      doRedirectToAuthenticationEndpoint(req, res);
+    } else {
+      sendForbidden(req, res);
+    }
+  }
+
+  /**
+   * This method is called whenever the user is not authorized and the request is a {@linkplain
+   * Utils#isSafeMethod safe} {@linkplain Utils#isNavigation navigation} request.
+   *
    * <p>The default implementation simply calls the globally configured {@link
    * AuthenticationRedirector}, and allows {@linkplain #configureAuthenticationRequest configuring
    * the authentication request}.
    *
-   * <p>Subclasses can override this method to conditionally generate different responses.
-   *
    * @see #configureAuthenticationRequest
-   * @see HasRoleFilter
    * @see #sendUnauthorized
    */
   @ForOverride
-  protected void redirectToAuthenticationEndpoint(HttpServletRequest req, HttpServletResponse res)
+  protected void doRedirectToAuthenticationEndpoint(HttpServletRequest req, HttpServletResponse res)
       throws IOException, ServletException {
     authenticationRedirector.redirectToAuthenticationEndpoint(
         req,
@@ -124,20 +138,50 @@ public abstract class AbstractAuthorizationFilter extends HttpFilter {
       HttpServletRequest req, AuthenticationRequest.Builder builder) {}
 
   /**
-   * This method is called whenever is not authorized and the request is <b>not</b> a {@linkplain
-   * Utils#isSafeMethod safe} {@linkplain Utils#isNavigation navigation} request.
+   * This method is called whenever the user is not authorized and the request is <b>not</b> a
+   * {@linkplain Utils#isSafeMethod safe} {@linkplain Utils#isNavigation navigation} request.
+   *
+   * <p>This implementation calls {@link #sendForbidden} whenever the user is authenticated, and
+   * defers to {@link #doSendUnauthorized} otherwise.
+   *
+   * @see #redirectToAuthenticationEndpoint
+   */
+  @ForOverride
+  protected void sendUnauthorized(HttpServletRequest req, HttpServletResponse res)
+      throws IOException, ServletException {
+    if (req.getUserPrincipal() == null) {
+      doSendUnauthorized(req, res);
+    } else {
+      sendForbidden(req, res);
+    }
+  }
+
+  /**
+   * This method is called whenever the user is not authenticated and the request is <b>not</b> a
+   * {@linkplain Utils#isSafeMethod safe} {@linkplain Utils#isNavigation navigation} request.
    *
    * <p>The default implementation simply calls {@code res.sendError(SC_UNAUTHORIZED)}. This is not
    * strictly HTTP-compliant as it's missing the {@code WWW-Authenticate} response header, but is a
    * good way to signal the error to JavaScript clients making an AJAX request.
    *
+   * @see #sendUnauthorized
    * @see #redirectToAuthenticationEndpoint
-   * @see HasRoleFilter
    */
   @ForOverride
-  protected void sendUnauthorized(HttpServletRequest req, HttpServletResponse res)
+  protected void doSendUnauthorized(HttpServletRequest req, HttpServletResponse res)
       throws IOException, ServletException {
     // XXX: this is not http-compliant as it's missing WWW-Authenticate
     res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+  }
+
+  /**
+   * This method is called whenever the user is authenticated but not authorized.
+   *
+   * <p>The default implementation simply calls {@code res.sendError(SC_FORBIDDEN)}.
+   */
+  @ForOverride
+  protected void sendForbidden(HttpServletRequest req, HttpServletResponse res)
+      throws IOException, ServletException {
+    res.sendError(HttpServletResponse.SC_FORBIDDEN);
   }
 }
