@@ -14,7 +14,7 @@ dependencies {
 }
 
 nullaway {
-    annotatedPackages.add("net.ltgt.oidc")
+    onlyNullMarked = true
 }
 
 java {
