@@ -1,5 +1,7 @@
 package net.ltgt.oidc.servlet;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.errorprone.annotations.ForOverride;
 import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.Scope;
@@ -35,8 +37,8 @@ public class AuthenticationRedirector {
   private final String callbackPath;
 
   public AuthenticationRedirector(Configuration configuration, String callbackPath) {
-    this.configuration = configuration;
-    this.callbackPath = callbackPath;
+    this.configuration = requireNonNull(configuration);
+    this.callbackPath = requireNonNull(callbackPath);
   }
 
   /**

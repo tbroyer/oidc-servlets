@@ -1,5 +1,7 @@
 package net.ltgt.oidc.servlet;
 
+import static java.util.Objects.requireNonNull;
+
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.source.JWKSourceBuilder;
 import com.nimbusds.jose.proc.BadJOSEException;
@@ -29,17 +31,38 @@ import org.jspecify.annotations.Nullable;
  *     Back-Channel Logout 1.0</a>
  */
 public class BackchannelLogoutServlet extends HttpServlet {
+  private @Nullable Configuration configuration;
   private LoggedOutSessionStore loggedOutSessionStore;
   private LogoutTokenValidator logoutTokenValidator;
+
+  public BackchannelLogoutServlet() {}
+
+  /**
+   * Constructs a servlet with the given configuration and logged-out session store.
+   *
+   * <p>When this constructor is used, the servlet context attributes won't be read.
+   */
+  public BackchannelLogoutServlet(
+      Configuration configuration, LoggedOutSessionStore loggedOutSessionStore) {
+    this.configuration = requireNonNull(configuration);
+    this.loggedOutSessionStore = requireNonNull(loggedOutSessionStore);
+  }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Override
   public void init() throws ServletException {
-    loggedOutSessionStore =
-        (LoggedOutSessionStore)
-            getServletContext().getAttribute(LoggedOutSessionStore.CONTEXT_ATTRIBUTE_NAME);
-    Configuration configuration =
-        (Configuration) getServletContext().getAttribute(Configuration.CONTEXT_ATTRIBUTE_NAME);
+    if (loggedOutSessionStore == null) {
+      loggedOutSessionStore =
+          (LoggedOutSessionStore)
+              getServletContext().getAttribute(LoggedOutSessionStore.CONTEXT_ATTRIBUTE_NAME);
+    }
+    var configuration = this.configuration;
+    if (configuration == null) {
+      configuration =
+          (Configuration) getServletContext().getAttribute(Configuration.CONTEXT_ATTRIBUTE_NAME);
+    }
+    requireNonNull(loggedOutSessionStore, "loggedOutSessionStore");
+    requireNonNull(configuration, "configuration");
     try {
       logoutTokenValidator =
           new LogoutTokenValidator(

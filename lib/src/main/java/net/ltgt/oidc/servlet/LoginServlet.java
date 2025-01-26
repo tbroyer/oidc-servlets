@@ -1,5 +1,7 @@
 package net.ltgt.oidc.servlet;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.errorprone.annotations.ForOverride;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
@@ -22,12 +24,27 @@ import java.io.IOException;
 public class LoginServlet extends HttpServlet {
   private AuthenticationRedirector authenticationRedirector;
 
+  public LoginServlet() {}
+
+  /**
+   * Constructs a servlet with the given authentication redirector.
+   *
+   * <p>When this constructor is used, the {@linkplain
+   * AuthenticationRedirector#CONTEXT_ATTRIBUTE_NAME servlet context attribute} won't be read.
+   */
+  public LoginServlet(AuthenticationRedirector authenticationRedirector) {
+    this.authenticationRedirector = requireNonNull(authenticationRedirector);
+  }
+
   @OverridingMethodsMustInvokeSuper
   @Override
   public void init() throws ServletException {
-    authenticationRedirector =
-        (AuthenticationRedirector)
-            getServletContext().getAttribute(AuthenticationRedirector.CONTEXT_ATTRIBUTE_NAME);
+    if (authenticationRedirector == null) {
+      authenticationRedirector =
+          (AuthenticationRedirector)
+              getServletContext().getAttribute(AuthenticationRedirector.CONTEXT_ATTRIBUTE_NAME);
+    }
+    requireNonNull(authenticationRedirector, "authenticationRedirector");
   }
 
   @Override

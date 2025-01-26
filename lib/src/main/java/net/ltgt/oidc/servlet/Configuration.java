@@ -1,5 +1,7 @@
 package net.ltgt.oidc.servlet;
 
+import static java.util.Objects.requireNonNull;
+
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.openid.connect.sdk.op.ReadOnlyOIDCProviderMetadata;
 import java.util.function.Function;
@@ -23,9 +25,9 @@ public class Configuration {
       ReadOnlyOIDCProviderMetadata providerMetadata,
       ClientAuthentication clientAuthentication,
       Function<SessionInfo, UserPrincipal> userPrincipalFactory) {
-    this.providerMetadata = providerMetadata;
-    this.clientAuthentication = clientAuthentication;
-    this.userPrincipalFactory = userPrincipalFactory;
+    this.providerMetadata = requireNonNull(providerMetadata);
+    this.clientAuthentication = requireNonNull(clientAuthentication);
+    this.userPrincipalFactory = requireNonNull(userPrincipalFactory);
   }
 
   /** Constructs a configuration instance that creates instances of {@link SimpleUserPrincipal}. */
@@ -43,6 +45,6 @@ public class Configuration {
   }
 
   public UserPrincipal createUserPrincipal(SessionInfo sessionInfo) {
-    return userPrincipalFactory.apply(sessionInfo);
+    return requireNonNull(userPrincipalFactory.apply(sessionInfo));
   }
 }

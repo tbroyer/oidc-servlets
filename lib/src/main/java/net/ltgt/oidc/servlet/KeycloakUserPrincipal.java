@@ -1,5 +1,7 @@
 package net.ltgt.oidc.servlet;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Collection;
 import java.util.Optional;
 
@@ -8,7 +10,7 @@ public class KeycloakUserPrincipal implements UserPrincipal {
   private final SessionInfo sessionInfo;
 
   public KeycloakUserPrincipal(SessionInfo sessionInfo) {
-    this.sessionInfo = sessionInfo;
+    this.sessionInfo = requireNonNull(sessionInfo);
   }
 
   @Override

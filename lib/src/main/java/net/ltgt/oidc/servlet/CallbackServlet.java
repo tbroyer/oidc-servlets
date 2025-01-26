@@ -1,5 +1,7 @@
 package net.ltgt.oidc.servlet;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.errorprone.annotations.ForOverride;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.source.JWKSourceBuilder;
@@ -54,11 +56,26 @@ public class CallbackServlet extends HttpServlet {
   private Configuration configuration;
   private IDTokenValidator idTokenValidator;
 
+  public CallbackServlet() {}
+
+  /**
+   * Constructs a servlet with the given configuration.
+   *
+   * <p>When this constructor is used, the {@linkplain Configuration#CONTEXT_ATTRIBUTE_NAME servlet
+   * context attribute} won't be read.
+   */
+  public CallbackServlet(Configuration configuration) {
+    this.configuration = requireNonNull(configuration);
+  }
+
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Override
   public void init() throws ServletException {
-    configuration =
-        (Configuration) getServletContext().getAttribute(Configuration.CONTEXT_ATTRIBUTE_NAME);
+    if (configuration == null) {
+      configuration =
+          (Configuration) getServletContext().getAttribute(Configuration.CONTEXT_ATTRIBUTE_NAME);
+    }
+    requireNonNull(configuration, "configuration");
     try {
       idTokenValidator =
           new IDTokenValidator(

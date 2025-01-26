@@ -30,12 +30,27 @@ public abstract class AbstractAuthorizationFilter extends HttpFilter {
 
   private AuthenticationRedirector authenticationRedirector;
 
+  protected AbstractAuthorizationFilter() {}
+
+  /**
+   * Constructs a filter with the given authentication redirector.
+   *
+   * <p>When this constructor is used, the {@linkplain
+   * AuthenticationRedirector#CONTEXT_ATTRIBUTE_NAME servlet context attribute} won't be read.
+   */
+  protected AbstractAuthorizationFilter(AuthenticationRedirector authenticationRedirector) {
+    this.authenticationRedirector = requireNonNull(authenticationRedirector);
+  }
+
   @OverridingMethodsMustInvokeSuper
   @Override
   public void init() throws ServletException {
-    authenticationRedirector =
-        (AuthenticationRedirector)
-            getServletContext().getAttribute(AuthenticationRedirector.CONTEXT_ATTRIBUTE_NAME);
+    if (authenticationRedirector == null) {
+      authenticationRedirector =
+          (AuthenticationRedirector)
+              getServletContext().getAttribute(AuthenticationRedirector.CONTEXT_ATTRIBUTE_NAME);
+    }
+    requireNonNull(authenticationRedirector, "authenticationRedirector");
   }
 
   @ForOverride

@@ -1,5 +1,7 @@
 package net.ltgt.oidc.servlet;
 
+import static java.util.Objects.requireNonNull;
+
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.openid.connect.sdk.LogoutRequest;
 import jakarta.servlet.ServletException;
@@ -41,7 +43,8 @@ public class LogoutServlet extends HttpServlet {
    * Constructs a logout servlet with the given post-logout redirect path.
    *
    * <p>When this constructor is used, <i>logout state</i> won't be used, and the init parameters
-   * won't be read.
+   * won't be read; the {@linkplain Configuration#CONTEXT_ATTRIBUTE_NAME configuration} servlet
+   * context attribute will be read though.
    *
    * <p>This is equivalent to {@code new LogoutServlet(postLogoutRedirectPath, false)}.
    */
@@ -53,23 +56,56 @@ public class LogoutServlet extends HttpServlet {
    * Constructs a logout servlet with the given post-logout redirect path and whether to use
    * <i>logout state</i>.
    *
-   * <p>When this constructor is used, the init parameters won't be read.
+   * <p>When this constructor is used, the init parameters won't be read; the {@linkplain
+   * Configuration#CONTEXT_ATTRIBUTE_NAME configuration} servlet context attribute will be read
+   * though.
    */
   public LogoutServlet(String postLogoutRedirectPath, boolean useLogoutState) {
     this.postLogoutRedirectPath = postLogoutRedirectPath;
     this.useLogoutState = useLogoutState;
   }
 
+  /**
+   * Constructs a logout servlet with the given configuration and post-logout redirect path.
+   *
+   * <p>When this constructor is used, <i>logout state</i> won't be used, and neither the servlet
+   * context attribute nor the init parameters will be read.
+   *
+   * <p>This is equivalent to {@code new LogoutServlet(configuration, postLogoutRedirectPath,
+   * false)}.
+   */
+  public LogoutServlet(Configuration configuration, String postLogoutRedirectPath) {
+    this(configuration, postLogoutRedirectPath, false);
+  }
+
+  /**
+   * Constructs a logout servlet with the given configuration and post-logout redirect path, and
+   * whether to use <i>logout state</i>.
+   *
+   * <p>When this constructor is used, neither the servlet context attribute nor the init parameters
+   * will be read.
+   */
+  public LogoutServlet(
+      Configuration configuration, String postLogoutRedirectPath, boolean useLogoutState) {
+    this.configuration = requireNonNull(configuration);
+    this.postLogoutRedirectPath = requireNonNull(postLogoutRedirectPath);
+    this.useLogoutState = useLogoutState;
+  }
+
   @Override
   public void init() throws ServletException {
-    configuration =
-        (Configuration) getServletContext().getAttribute(Configuration.CONTEXT_ATTRIBUTE_NAME);
+    if (configuration == null) {
+      configuration =
+          (Configuration) getServletContext().getAttribute(Configuration.CONTEXT_ATTRIBUTE_NAME);
+    }
     if (postLogoutRedirectPath == null) {
       postLogoutRedirectPath = getInitParameter(POST_LOGOUT_REDIRECT_PATH);
     }
     if (useLogoutState == null) {
       useLogoutState = Boolean.parseBoolean(getInitParameter(USE_LOGOUT_STATE));
     }
+    requireNonNull(configuration, "configuration");
+    // No need to check useLogoutState as Boolean.parseBoolean returns a non-null value
   }
 
   // XXX: what to do on GET? show interstitial?

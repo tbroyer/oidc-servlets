@@ -20,6 +20,7 @@ It fulfills the following needs:
 * A single API servlet that can tell users apart and handle authorizations (depending on projects this could be Jakarta RS or GraphQL for example)
 * Static resources don't necessarily need authentication (more precisely, subresources –whether static or not, though most likely they are– should not redirect for authentication but rather either be served anyway or just blocked, both behaviors should be possible depending on needs)
 * Authentication should work well with internal servlet forwarding, as that's how I serve the same HTML web page for various URLs for Single Page Applications (SPA) that are fully client-side rendered (CSR); more precisely, the URL to redirect to after authentication should be the originally requested URL and not the one the request has been forwarded to.
+* Dependency-injection friendly
 
 ## Example application
 
@@ -54,6 +55,9 @@ var redirector = new AuthenticationRedirector(configuration, CALLBACK_PATH);
 servletContext.setAttribute(Configuration.CONTEXT_ATTRIBUTE_NAME, configuration);
 servletContext.setAttribute(AuthenticationRedirector.CONTEXT_ATTRIBUTE_NAME, redirector);
 ```
+
+> [!NOTE]
+> You can also pass those objects to the servlets' and filters' constructor if you instantiate them yourself (or through a dependency-injection framework), rather than using `ServletContext` attributes. The same is true for values passed as init parameters.
 
 Register the `CallbackServlet` to the path configured with the `AuthenticationRedirector`:
 

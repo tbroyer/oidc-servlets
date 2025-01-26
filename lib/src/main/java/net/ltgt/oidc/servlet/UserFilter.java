@@ -1,5 +1,7 @@
 package net.ltgt.oidc.servlet;
 
+import static java.util.Objects.requireNonNull;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpFilter;
@@ -27,15 +29,48 @@ import org.jspecify.annotations.Nullable;
  */
 public class UserFilter extends HttpFilter {
   private Configuration configuration;
-  private @Nullable LoggedOutSessionStore loggedOutSessionStore;
+  private LoggedOutSessionStore loggedOutSessionStore;
+
+  public UserFilter() {}
+
+  /**
+   * Constructs a filter with the given configuration and no logged-out session store.
+   *
+   * <p>When this constructor is used, the servlet context attributes won't be read.
+   *
+   * <p>This is equivalent to {@code new UserFilter(configuration, null)}.
+   */
+  public UserFilter(Configuration configuration) {
+    this(configuration, null);
+  }
+
+  /**
+   * Constructs a filter with the given configuration and (optional) logged-out session store.
+   *
+   * <p>When this constructor is used, the servlet context attributes won't be read.
+   */
+  public UserFilter(
+      Configuration configuration, @Nullable LoggedOutSessionStore loggedOutSessionStore) {
+    this.configuration = requireNonNull(configuration);
+    this.loggedOutSessionStore =
+        loggedOutSessionStore != null ? loggedOutSessionStore : NullLoggedOutSessionStore.INSTANCE;
+  }
 
   @Override
   public void init() throws ServletException {
-    configuration =
-        (Configuration) getServletContext().getAttribute(Configuration.CONTEXT_ATTRIBUTE_NAME);
-    loggedOutSessionStore =
-        (LoggedOutSessionStore)
-            getServletContext().getAttribute(LoggedOutSessionStore.CONTEXT_ATTRIBUTE_NAME);
+    if (configuration == null) {
+      configuration =
+          (Configuration) getServletContext().getAttribute(Configuration.CONTEXT_ATTRIBUTE_NAME);
+    }
+    requireNonNull(configuration);
+    if (loggedOutSessionStore == null) {
+      loggedOutSessionStore =
+          (LoggedOutSessionStore)
+              getServletContext().getAttribute(LoggedOutSessionStore.CONTEXT_ATTRIBUTE_NAME);
+    }
+    if (loggedOutSessionStore == null) {
+      loggedOutSessionStore = NullLoggedOutSessionStore.INSTANCE;
+    }
   }
 
   @Override
@@ -45,8 +80,7 @@ public class UserFilter extends HttpFilter {
     if (session != null) {
       var sessionInfo = (SessionInfo) session.getAttribute(SessionInfo.SESSION_ATTRIBUTE_NAME);
       if (sessionInfo != null) {
-        if (loggedOutSessionStore != null
-            && sessionInfo.getIDTokenClaims().getSessionID() != null
+        if (sessionInfo.getIDTokenClaims().getSessionID() != null
             && loggedOutSessionStore.isLoggedOut(sessionInfo.getIDTokenClaims().getSessionID())) {
           session.invalidate();
         } else {
