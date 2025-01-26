@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.openid.connect.sdk.op.ReadOnlyOIDCProviderMetadata;
-import java.util.function.Function;
 
 /**
  * Contains the OpenID Connect-related configuration.
@@ -19,12 +18,12 @@ public class Configuration {
 
   private final ReadOnlyOIDCProviderMetadata providerMetadata;
   private final ClientAuthentication clientAuthentication;
-  private final Function<SessionInfo, UserPrincipal> userPrincipalFactory;
+  private final UserPrincipalFactory userPrincipalFactory;
 
   public Configuration(
       ReadOnlyOIDCProviderMetadata providerMetadata,
       ClientAuthentication clientAuthentication,
-      Function<SessionInfo, UserPrincipal> userPrincipalFactory) {
+      UserPrincipalFactory userPrincipalFactory) {
     this.providerMetadata = requireNonNull(providerMetadata);
     this.clientAuthentication = requireNonNull(clientAuthentication);
     this.userPrincipalFactory = requireNonNull(userPrincipalFactory);
@@ -45,6 +44,6 @@ public class Configuration {
   }
 
   public UserPrincipal createUserPrincipal(SessionInfo sessionInfo) {
-    return requireNonNull(userPrincipalFactory.apply(sessionInfo));
+    return requireNonNull(userPrincipalFactory.createUserPrincipal(sessionInfo));
   }
 }
