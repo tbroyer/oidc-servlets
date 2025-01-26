@@ -10,7 +10,9 @@ My needs are rather simple, so I want something simpler, and it turns out Nimbus
 
 ## Requirements
 
-The project requires a JDK in version 21 or higher, and Docker with Docker Compose.
+The project requires a JDK in version 21 or higher.
+
+You will need Docker Compose to run the example application, or run the tests locally (e.g. to contribute).
 
 It fulfills the following needs:
 
