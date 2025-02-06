@@ -18,6 +18,13 @@ tasks {
         systemProperty("example.issuer", "http://localhost:8080/realms/example")
         systemProperty("example.clientId", "app")
         systemProperty("example.clientSecret", "example")
+        systemProperty(
+            "example.sessionStoreDir",
+            layout.buildDirectory
+                .dir("session-store")
+                .get()
+                .asFile,
+        )
         args(layout.projectDirectory.dir("src/main/webapp"))
     }
 }

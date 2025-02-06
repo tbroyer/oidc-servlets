@@ -10,6 +10,7 @@ import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import jakarta.servlet.ServletContext;
+import java.io.File;
 import java.nio.file.Files;
 import java.util.EnumSet;
 import java.util.Set;
@@ -34,6 +35,7 @@ import org.eclipse.jetty.ee10.servlet.ServletContainerInitializerHolder;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.session.FileSessionDataStoreFactory;
 
 public class Main {
 
@@ -52,6 +54,13 @@ public class Main {
             KeycloakUserPrincipal::new);
 
     var server = new Server(Integer.getInteger("example.port", 8000));
+
+    var sessionStoreDir = System.getProperty("example.sessionStoreDir");
+    if (sessionStoreDir != null) {
+      var sessionDataStoreFactory = new FileSessionDataStoreFactory();
+      sessionDataStoreFactory.setStoreDir(new File(sessionStoreDir));
+      server.addBean(sessionDataStoreFactory);
+    }
 
     var contextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
     contextHandler.setBaseResourceAsString(args[0]);
