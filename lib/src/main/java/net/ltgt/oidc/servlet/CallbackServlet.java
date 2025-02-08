@@ -25,6 +25,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -49,23 +50,28 @@ import org.jspecify.annotations.Nullable;
  * <p>After validating the request, and if authentication was successful, the user will be
  * redirected to the page stored in the authentication state.
  *
+ * <p>If a {@link UserPrincipalFactory} is available in the {@link jakarta.servlet.ServletContext
+ * ServletContext}, it'll be called to possibly load additional data to the session, that can later
+ * be made available through the {@link UserPrincipal}.
+ *
  * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html">OpenID Connect Core 1.0</a>
  */
 public class CallbackServlet extends HttpServlet {
 
   private Configuration configuration;
+  private UserPrincipalFactory userPrincipalFactory;
   private IDTokenValidator idTokenValidator;
 
   public CallbackServlet() {}
 
   /**
-   * Constructs a servlet with the given configuration.
+   * Constructs a servlet with the given configuration and {@link UserPrincipal} factory.
    *
-   * <p>When this constructor is used, the {@linkplain Configuration#CONTEXT_ATTRIBUTE_NAME servlet
-   * context attribute} won't be read.
+   * <p>When this constructor is used, the servlet context attributes won't be read.
    */
-  public CallbackServlet(Configuration configuration) {
+  public CallbackServlet(Configuration configuration, UserPrincipalFactory userPrincipalFactory) {
     this.configuration = requireNonNull(configuration);
+    this.userPrincipalFactory = requireNonNull(userPrincipalFactory);
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
@@ -76,6 +82,14 @@ public class CallbackServlet extends HttpServlet {
           (Configuration) getServletContext().getAttribute(Configuration.CONTEXT_ATTRIBUTE_NAME);
     }
     requireNonNull(configuration, "configuration");
+    if (userPrincipalFactory == null) {
+      userPrincipalFactory =
+          (UserPrincipalFactory)
+              getServletContext().getAttribute(UserPrincipalFactory.CONTEXT_ATTRIBUTE_NAME);
+    }
+    if (userPrincipalFactory == null) {
+      userPrincipalFactory = SimpleUserPrincipal.FACTORY;
+    }
     try {
       idTokenValidator =
           new IDTokenValidator(
@@ -216,10 +230,10 @@ public class CallbackServlet extends HttpServlet {
       }
     }
     req.changeSessionId();
-    req.getSession()
-        .setAttribute(
-            SessionInfo.SESSION_ATTRIBUTE_NAME,
-            new SessionInfo(successResponse.getOIDCTokens(), idTokenClaims, userInfo));
+    var sessionInfo = new SessionInfo(successResponse.getOIDCTokens(), idTokenClaims, userInfo);
+    HttpSession session = req.getSession();
+    session.setAttribute(SessionInfo.SESSION_ATTRIBUTE_NAME, sessionInfo);
+    userPrincipalFactory.userAuthenticated(sessionInfo, session);
     Utils.sendRedirect(resp, authenticationState.requestUri());
   }
 

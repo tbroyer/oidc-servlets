@@ -7,6 +7,9 @@ import java.util.Optional;
 
 /** A {@link UserPrincipal} that extracts Keycloak <i>realm</i> roles from the user information. */
 public class KeycloakUserPrincipal implements UserPrincipal {
+  public static final UserPrincipalFactory FACTORY =
+      (sessionInfo, unused) -> new KeycloakUserPrincipal(sessionInfo);
+
   private final SessionInfo sessionInfo;
 
   public KeycloakUserPrincipal(SessionInfo sessionInfo) {

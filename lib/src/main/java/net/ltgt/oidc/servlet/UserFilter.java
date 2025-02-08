@@ -67,7 +67,7 @@ public class UserFilter extends HttpFilter {
               getServletContext().getAttribute(UserPrincipalFactory.CONTEXT_ATTRIBUTE_NAME);
     }
     if (userPrincipalFactory == null) {
-      userPrincipalFactory = SimpleUserPrincipal::new;
+      userPrincipalFactory = SimpleUserPrincipal.FACTORY;
     }
     if (loggedOutSessionStore == null) {
       loggedOutSessionStore =
@@ -90,7 +90,7 @@ public class UserFilter extends HttpFilter {
             && loggedOutSessionStore.isLoggedOut(sessionInfo.getIDTokenClaims().getSessionID())) {
           session.invalidate();
         } else {
-          var userPrincipal = userPrincipalFactory.createUserPrincipal(sessionInfo);
+          var userPrincipal = userPrincipalFactory.createUserPrincipal(sessionInfo, session);
           req = wrapRequest(req, userPrincipal);
         }
       }

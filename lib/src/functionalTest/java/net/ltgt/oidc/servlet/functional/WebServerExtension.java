@@ -77,8 +77,7 @@ public class WebServerExtension implements BeforeEachCallback, AfterEachCallback
         AuthenticationRedirector.CONTEXT_ATTRIBUTE_NAME,
         new AuthenticationRedirector(configuration, CALLBACK_PATH));
     contextHandler.setAttribute(
-        UserPrincipalFactory.CONTEXT_ATTRIBUTE_NAME,
-        (UserPrincipalFactory) KeycloakUserPrincipal::new);
+        UserPrincipalFactory.CONTEXT_ATTRIBUTE_NAME, KeycloakUserPrincipal.FACTORY);
 
     contextHandler.addFilter(UserFilter.class, "/*", null);
     contextHandler.addServlet(CallbackServlet.class, CALLBACK_PATH);

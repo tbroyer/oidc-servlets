@@ -72,8 +72,7 @@ public class Main {
         AuthenticationRedirector.CONTEXT_ATTRIBUTE_NAME,
         new AuthenticationRedirector(configuration, CALLBACK_PATH));
     contextHandler.setAttribute(
-        UserPrincipalFactory.CONTEXT_ATTRIBUTE_NAME,
-        (UserPrincipalFactory) KeycloakUserPrincipal::new);
+        UserPrincipalFactory.CONTEXT_ATTRIBUTE_NAME, KeycloakUserPrincipal.FACTORY);
     contextHandler.setAttribute(
         LoggedOutSessionStore.CONTEXT_ATTRIBUTE_NAME,
         new InMemoryLoggedOutSessionStore() {
