@@ -193,4 +193,21 @@ servletContext.addServlet("backchannel-logout", BackchannelLogoutServlet.class)
     .addMapping("/backchannel-logout");
 ```
 
-<!-- TODO: allow specific implementations to immediately invalidate sessions -->
+The mapping can also be used directly when a backchannel logout request is received to immediately invalidate sessions (without waiting for the next request); this depends on the actual implementation of the session manager in the servlet container, so will have to be implemented by subclassing `InMemoryLoggedOutSessionListener` and implementing its `doLogout` method.  In an embedded Jetty server, one could immediately invalidate sessions with code like:
+
+```java
+// Using the Jetty API
+contextHandler.setAttribute(
+    LoggedOutSessionStore.CONTEXT_ATTRIBUTE_NAME,
+    new InMemoryLoggedOutSessionStore() {
+      @Override
+      protected void doLogout(Set<String> sessionIds) {
+        for (var sessionId : sessionIds) {
+          var session = contextHandler.getSessionHandler().getManagedSession(sessionId);
+          if (session != null) {
+            session.invalidate();
+          }
+        }
+      }
+    });
+```

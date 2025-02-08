@@ -1,5 +1,6 @@
 package net.ltgt.oidc.servlet;
 
+import com.google.errorprone.annotations.ForOverride;
 import com.nimbusds.openid.connect.sdk.claims.SessionID;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
@@ -7,7 +8,11 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/** An implementation of {@link LoggedOutSessionStore} that stores session IDs in memory. */
+/**
+ * An implementation of {@link LoggedOutSessionStore} that stores session IDs in memory.
+ *
+ * <p>A subclass can override {@link #doLogout} to effectively invalidate sessions.
+ */
 public class InMemoryLoggedOutSessionStore implements LoggedOutSessionStore {
 
   private final ConcurrentMap<SessionID, Set<String>> loggedInSessions =
@@ -15,8 +20,21 @@ public class InMemoryLoggedOutSessionStore implements LoggedOutSessionStore {
 
   @Override
   public void logout(SessionID sessionID) {
-    loggedInSessions.remove(sessionID);
+    var loggedOutSessions = loggedInSessions.remove(sessionID);
+    doLogout(loggedOutSessions);
   }
+
+  /**
+   * Can be implemented to effectively invalidate sessions.
+   *
+   * <p>A Jetty implementation could thus use {@code getManagedSession(sessionId).invalidate()} on
+   * the context's {@code SessionManager}, a Tomcat implementation {@code
+   * findSession(sessionId).invalidate()} on the context's {@code Manager}, an Undertow
+   * implementation {@code getSession(sessionId).invalidate(null)} on the context's {@code
+   * SessionManager}, etc.
+   */
+  @ForOverride
+  protected void doLogout(Set<String> sessionIds) {}
 
   @Override
   public boolean isLoggedOut(SessionID sessionID) {

@@ -12,6 +12,7 @@ import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import jakarta.servlet.ServletContext;
 import java.nio.file.Files;
 import java.util.EnumSet;
+import java.util.Set;
 import net.ltgt.oidc.servlet.AuthenticationRedirector;
 import net.ltgt.oidc.servlet.BackchannelLogoutServlet;
 import net.ltgt.oidc.servlet.BackchannelLogoutSessionListener;
@@ -62,7 +63,18 @@ public class Main {
         AuthenticationRedirector.CONTEXT_ATTRIBUTE_NAME,
         new AuthenticationRedirector(configuration, CALLBACK_PATH));
     contextHandler.setAttribute(
-        LoggedOutSessionStore.CONTEXT_ATTRIBUTE_NAME, new InMemoryLoggedOutSessionStore());
+        LoggedOutSessionStore.CONTEXT_ATTRIBUTE_NAME,
+        new InMemoryLoggedOutSessionStore() {
+          @Override
+          protected void doLogout(Set<String> sessionIds) {
+            for (var sessionId : sessionIds) {
+              var session = contextHandler.getSessionHandler().getManagedSession(sessionId);
+              if (session != null) {
+                session.invalidate();
+              }
+            }
+          }
+        });
 
     contextHandler.addEventListener(new BackchannelLogoutSessionListener());
 
