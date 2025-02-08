@@ -9,12 +9,4 @@ class NullLoggedOutSessionStore implements LoggedOutSessionStore {
 
   @Override
   public void logout(SessionID sessionID) {}
-
-  @Override
-  public boolean isLoggedOut(SessionID sessionID) {
-    return false;
-  }
-
-  @Override
-  public void forget(SessionID sessionID) {}
 }

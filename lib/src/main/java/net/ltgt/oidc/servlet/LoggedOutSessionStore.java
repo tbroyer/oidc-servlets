@@ -7,13 +7,14 @@ import com.nimbusds.openid.connect.sdk.claims.SessionID;
  * Logout protocol through the {@link BackchannelLogoutServlet}.
  *
  * <p>Those sessions will be invalidated by the {@link UserFilter} when a corresponding {@link
- * jakarta.servlet.http.HttpSession HttpSession} is being used, and once destroyed the {@link
- * BackchannelLogoutSessionListener} is responsible for notifying this store so the {@code
- * SessionID} can be forgotten (to prevent the store growing indefinitely).
+ * jakarta.servlet.http.HttpSession HttpSession} is being used. The {@link
+ * BackchannelLogoutSessionListener} is responsible for notifying this store of the {@code
+ * SessionID} that are being used by sessions.
  *
  * <p>Implementations could also directly invalidate the session if possible, rather than only
- * marking it as logged out to later be invalidated by the {@code UserFilter}. In this case, the
- * {@code BackchannelLogoutSessionListener} might not be necessary.
+ * somehow marking it as logged out to later be invalidated by the {@code UserFilter}. In this case,
+ * the {@code BackchannelLogoutSessionListener} might not be necessary depending on the
+ * implementation.
  *
  * @see InMemoryLoggedOutSessionStore
  * @see UserFilter
@@ -30,27 +31,43 @@ public interface LoggedOutSessionStore {
    *
    * <p>Implementations could also directly invalidate the session if possible, rather than only
    * marking it as logged out to later be invalidated by the {@code UserFilter}. In this case, the
-   * {@code BackchannelLogoutSessionListener} might not be necessary.
+   * {@code BackchannelLogoutSessionListener} might not be necessary depending on the
+   * implementation.
    *
    * @see BackchannelLogoutServlet
    */
   void logout(SessionID sessionID);
 
   /**
-   * Returns whether the given session ID has been logged out.
+   * Returns whether the given session ID has been {@linkplain #logout logged out}.
+   *
+   * <p>Called by {@link UserFilter} to possibly invalidate sessions as they're being tentatively
+   * used.
    *
    * @see #logout
    * @see UserFilter
    */
-  boolean isLoggedOut(SessionID sessionID);
+  default boolean isLoggedOut(SessionID sessionID) {
+    return false;
+  }
 
   /**
-   * Forgets about the given session ID.
-   *
-   * <p>This method should be called when the corresponding {@link jakarta.servlet.http.HttpSession
-   * HttpSession} has been destroyed, to release memory.
+   * Associates the OpenID Provider session ID with a new application's HTTP session.
    *
    * @see BackchannelLogoutSessionListener
    */
-  void forget(SessionID sessionID);
+  default void acquire(SessionID sessionID, String sessionId) {}
+
+  /**
+   * Dissociates the OpenID Provider session ID from an application's HTTP session.
+   *
+   * @see BackchannelLogoutSessionListener
+   */
+  default void release(SessionID sessionID, String sessionId) {}
+
+  /**
+   * Notifies the store that the application's HTTP session, associated with a given OpenID Provider
+   * session ID, has changed ID.
+   */
+  default void renew(SessionID sessionID, String oldSessionId, String newSessionId) {}
 }

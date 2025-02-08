@@ -23,6 +23,10 @@ import org.jspecify.annotations.Nullable;
 /**
  * Implements the OpenID Connect Back-Channel Logout URI.
  *
+ * <p>The OpenID Provider must support session IDs ({@code "backchannel_logout_session_supported":
+ * true}). The application must have been registered to require the session ID ({@code
+ * "backchannel_logout_session_required": true}).
+ *
  * <p>This servlet must not be protected by authentication or CSRF protections. A {@link
  * LoggedOutSessionStore} instance must have been added as a {@link jakarta.servlet.ServletContext
  * ServletContext} attribute under the name {@link LoggedOutSessionStore#CONTEXT_ATTRIBUTE_NAME}.
