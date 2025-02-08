@@ -18,21 +18,11 @@ public class Configuration {
 
   private final ReadOnlyOIDCProviderMetadata providerMetadata;
   private final ClientAuthentication clientAuthentication;
-  private final UserPrincipalFactory userPrincipalFactory;
 
-  public Configuration(
-      ReadOnlyOIDCProviderMetadata providerMetadata,
-      ClientAuthentication clientAuthentication,
-      UserPrincipalFactory userPrincipalFactory) {
-    this.providerMetadata = requireNonNull(providerMetadata);
-    this.clientAuthentication = requireNonNull(clientAuthentication);
-    this.userPrincipalFactory = requireNonNull(userPrincipalFactory);
-  }
-
-  /** Constructs a configuration instance that creates instances of {@link SimpleUserPrincipal}. */
   public Configuration(
       ReadOnlyOIDCProviderMetadata providerMetadata, ClientAuthentication clientAuthentication) {
-    this(providerMetadata, clientAuthentication, SimpleUserPrincipal::new);
+    this.providerMetadata = requireNonNull(providerMetadata);
+    this.clientAuthentication = requireNonNull(clientAuthentication);
   }
 
   public ReadOnlyOIDCProviderMetadata getProviderMetadata() {
@@ -41,9 +31,5 @@ public class Configuration {
 
   public ClientAuthentication getClientAuthentication() {
     return clientAuthentication;
-  }
-
-  public UserPrincipal createUserPrincipal(SessionInfo sessionInfo) {
-    return requireNonNull(userPrincipalFactory.createUserPrincipal(sessionInfo));
   }
 }

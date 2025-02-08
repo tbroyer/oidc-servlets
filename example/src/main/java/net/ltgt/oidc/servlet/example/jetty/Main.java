@@ -28,6 +28,7 @@ import net.ltgt.oidc.servlet.LoginServlet;
 import net.ltgt.oidc.servlet.LogoutCallbackServlet;
 import net.ltgt.oidc.servlet.LogoutServlet;
 import net.ltgt.oidc.servlet.UserFilter;
+import net.ltgt.oidc.servlet.UserPrincipalFactory;
 import org.eclipse.jetty.ee10.apache.jsp.JettyJasperInitializer;
 import org.eclipse.jetty.ee10.jsp.JettyJspServlet;
 import org.eclipse.jetty.ee10.servlet.DefaultServlet;
@@ -50,8 +51,7 @@ public class Main {
                 new Issuer(requireNonNull(System.getProperty("example.issuer")))),
             new ClientSecretBasic(
                 new ClientID(requireNonNull(System.getProperty("example.clientId"))),
-                new Secret(requireNonNull(System.getProperty("example.clientSecret")))),
-            KeycloakUserPrincipal::new);
+                new Secret(requireNonNull(System.getProperty("example.clientSecret")))));
 
     var server = new Server(Integer.getInteger("example.port", 8000));
 
@@ -71,6 +71,9 @@ public class Main {
     contextHandler.setAttribute(
         AuthenticationRedirector.CONTEXT_ATTRIBUTE_NAME,
         new AuthenticationRedirector(configuration, CALLBACK_PATH));
+    contextHandler.setAttribute(
+        UserPrincipalFactory.CONTEXT_ATTRIBUTE_NAME,
+        (UserPrincipalFactory) KeycloakUserPrincipal::new);
     contextHandler.setAttribute(
         LoggedOutSessionStore.CONTEXT_ATTRIBUTE_NAME,
         new InMemoryLoggedOutSessionStore() {

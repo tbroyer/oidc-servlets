@@ -18,8 +18,8 @@ import org.jspecify.annotations.Nullable;
  * <p>Initializes the request's {@link HttpServletRequest#getUserPrincipal() getUserPrincipal()} and
  * {@link HttpServletRequest#getRemoteUser() getRemoteUser()}, and implements its {@link
  * HttpServletRequest#isUserInRole isUserInRole(String)} for other filters and servlets down the
- * chain. The user principal will be created by the {@linkplain Configuration#createUserPrincipal
- * configuration} present in the {@link jakarta.servlet.ServletContext ServletContext}.
+ * chain. The user principal will be created by a {@link UserPrincipalFactory} present in the {@link
+ * jakarta.servlet.ServletContext ServletContext}.
  *
  * <p>Invalidates the {@link jakarta.servlet.http.HttpSession HttpSession} if a {@link
  * LoggedOutSessionStore} is present in the {@code ServletContext} and the session has been recorded
@@ -28,41 +28,47 @@ import org.jspecify.annotations.Nullable;
  * @see BackchannelLogoutServlet
  */
 public class UserFilter extends HttpFilter {
-  private Configuration configuration;
+  private UserPrincipalFactory userPrincipalFactory;
   private LoggedOutSessionStore loggedOutSessionStore;
 
   public UserFilter() {}
 
   /**
-   * Constructs a filter with the given configuration and no logged-out session store.
+   * Constructs a filter with the given {@link UserPrincipal} factory and no logged-out session
+   * store.
    *
    * <p>When this constructor is used, the servlet context attributes won't be read.
    *
-   * <p>This is equivalent to {@code new UserFilter(configuration, null)}.
+   * <p>This is equivalent to {@code new UserFilter(userPrincipalFactory, null)}.
    */
-  public UserFilter(Configuration configuration) {
-    this(configuration, null);
+  public UserFilter(UserPrincipalFactory userPrincipalFactory) {
+    this(userPrincipalFactory, null);
   }
 
   /**
-   * Constructs a filter with the given configuration and (optional) logged-out session store.
+   * Constructs a filter with the given {@link UserPrincipal} factory and (optional) logged-out
+   * session store.
    *
    * <p>When this constructor is used, the servlet context attributes won't be read.
    */
   public UserFilter(
-      Configuration configuration, @Nullable LoggedOutSessionStore loggedOutSessionStore) {
-    this.configuration = requireNonNull(configuration);
+      UserPrincipalFactory userPrincipalFactory,
+      @Nullable LoggedOutSessionStore loggedOutSessionStore) {
+    this.userPrincipalFactory = requireNonNull(userPrincipalFactory);
     this.loggedOutSessionStore =
         loggedOutSessionStore != null ? loggedOutSessionStore : NullLoggedOutSessionStore.INSTANCE;
   }
 
   @Override
   public void init() throws ServletException {
-    if (configuration == null) {
-      configuration =
-          (Configuration) getServletContext().getAttribute(Configuration.CONTEXT_ATTRIBUTE_NAME);
+    if (userPrincipalFactory == null) {
+      userPrincipalFactory =
+          (UserPrincipalFactory)
+              getServletContext().getAttribute(UserPrincipalFactory.CONTEXT_ATTRIBUTE_NAME);
     }
-    requireNonNull(configuration);
+    if (userPrincipalFactory == null) {
+      userPrincipalFactory = SimpleUserPrincipal::new;
+    }
     if (loggedOutSessionStore == null) {
       loggedOutSessionStore =
           (LoggedOutSessionStore)
@@ -84,17 +90,16 @@ public class UserFilter extends HttpFilter {
             && loggedOutSessionStore.isLoggedOut(sessionInfo.getIDTokenClaims().getSessionID())) {
           session.invalidate();
         } else {
-          req = wrapRequest(req, sessionInfo);
+          var userPrincipal = userPrincipalFactory.createUserPrincipal(sessionInfo);
+          req = wrapRequest(req, userPrincipal);
         }
       }
     }
     super.doFilter(req, res, chain);
   }
 
-  private HttpServletRequest wrapRequest(HttpServletRequest req, SessionInfo sessionInfo) {
+  private HttpServletRequest wrapRequest(HttpServletRequest req, UserPrincipal userPrincipal) {
     return new HttpServletRequestWrapper(req) {
-      private final UserPrincipal userPrincipal = configuration.createUserPrincipal(sessionInfo);
-
       @Override
       public String getRemoteUser() {
         return userPrincipal.getName();

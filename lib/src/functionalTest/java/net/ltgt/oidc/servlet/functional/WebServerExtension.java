@@ -15,6 +15,7 @@ import net.ltgt.oidc.servlet.CallbackServlet;
 import net.ltgt.oidc.servlet.Configuration;
 import net.ltgt.oidc.servlet.KeycloakUserPrincipal;
 import net.ltgt.oidc.servlet.UserFilter;
+import net.ltgt.oidc.servlet.UserPrincipalFactory;
 import org.eclipse.jetty.ee10.servlet.DefaultServlet;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.server.Server;
@@ -59,8 +60,7 @@ public class WebServerExtension implements BeforeEachCallback, AfterEachCallback
             providerMetadata,
             new ClientSecretBasic(
                 new ClientID(requireNonNull(System.getProperty("test.clientId"))),
-                new Secret(requireNonNull(System.getProperty("test.clientSecret")))),
-            KeycloakUserPrincipal::new);
+                new Secret(requireNonNull(System.getProperty("test.clientSecret")))));
     server = new Server(port);
     var contextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
     server.setHandler(contextHandler);
@@ -76,6 +76,9 @@ public class WebServerExtension implements BeforeEachCallback, AfterEachCallback
     contextHandler.setAttribute(
         AuthenticationRedirector.CONTEXT_ATTRIBUTE_NAME,
         new AuthenticationRedirector(configuration, CALLBACK_PATH));
+    contextHandler.setAttribute(
+        UserPrincipalFactory.CONTEXT_ATTRIBUTE_NAME,
+        (UserPrincipalFactory) KeycloakUserPrincipal::new);
 
     contextHandler.addFilter(UserFilter.class, "/*", null);
     contextHandler.addServlet(CallbackServlet.class, CALLBACK_PATH);

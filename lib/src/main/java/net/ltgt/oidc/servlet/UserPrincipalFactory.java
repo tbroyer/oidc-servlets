@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 @FunctionalInterface
 public interface UserPrincipalFactory {
+  String CONTEXT_ATTRIBUTE_NAME = UserPrincipalFactory.class.getName();
+
   /**
    * Called on each request by the {@link UserFilter} to create the {@link UserPrincipal} for the
    * authenticated user; that will be exposed downward the filter chain as the {@linkplain

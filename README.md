@@ -80,14 +80,13 @@ servletContext.addFilter("user", UserFilter.class)
     .addMappingForUrlPatterns(null, false, "/*");
 ```
 
-The implementation of `isUserInRole(String)` relies on the actual `UserPrincipal`, which is derived from the ID Token and User Info. The default implementation (`SimpleUserPrincipal`) always returns `false` (the user has no known role). Another implementation (`KeycloakUserPrincipal`) reads Keycloak realm roles from the User Info, and can be configured by passing the class' constructor to the `Configuration` constructor:
+The implementation of `isUserInRole(String)` relies on the actual `UserPrincipal`, which is derived from the ID Token and User Info. The default implementation (`SimpleUserPrincipal`) always returns `false` (the user has no known role). Other implementations can be used by configuring a `UserPrincipalFactory` as a `ServletContext` attribute. Another built-in implementation (`KeycloakUserPrincipal`) reads Keycloak realm roles from the User Info, and can be configured by using the class' constructor as the factory:
 
 ```java
-var configuration = new Configuration(
-    providerMetadata, clientAuthentication, KeycloakUserPrincipal::new);
+servletContext.setAttribute(
+    UserPrincipalFactory.CONTEXT_ATTRIBUTE_NAME,
+    (UserPrincipalFactory) KeycloakUserPrincipal::new);
 ```
-
-Custom `UserPrincipal` implementations can be created for other OpenID Providers.
 
 ### Login
 
