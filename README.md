@@ -87,7 +87,7 @@ servletContext.setAttribute(
     UserPrincipalFactory.CONTEXT_ATTRIBUTE_NAME, KeycloakUserPrincipal.FACTORY);
 ```
 
-Custom implementations can also read additional data (e.g. from a database) to expose in their custom `UserPrincipal`. If they can't afford doing it on each request, or would just rather do it once and _cache_ it for the duration of the session, they can implement the `UserPrincipalFactory`'s `userAuthenticated` hook to retrieve that data and store it in the session whenever the `CallbackServlet` authenticates the user, and then pull that data out of the session to construct the custom `UserPrincipal` on each subsequent request.
+Custom implementations can also read additional data (e.g. from a database) to expose in their custom `UserPrincipal`. If they can't afford doing it on each request, or would just rather do it once and _cache_ it for the duration of the session, they can implement the `UserPrincipalFactory`'s `userAuthenticated` hook to retrieve that data and store it in the session whenever the `CallbackServlet` authenticates the user, and then pull that data out of the session to construct the custom `UserPrincipal` on each subsequent request. That `userAuthenticated` hook can also be used to _synchronize_ user data from the OpenID Provider to a local database.
 
 ### Login
 

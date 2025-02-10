@@ -22,9 +22,11 @@ public interface UserPrincipalFactory {
   UserPrincipal createUserPrincipal(SessionInfo sessionInfo, HttpSession session);
 
   /**
-   * Called by the {@link CallbackServlet} when the user is successfully authenticated to load
-   * additional user data into the session, that can be used by {@link #createUserPrincipal} when
-   * creating the principal.
+   * Called by the {@link CallbackServlet} when the user is successfully authenticated.
+   *
+   * <p>This can be used to load additional user data into the session, that can be used by {@link
+   * #createUserPrincipal} when creating the principal, and/or to synchronize user information from
+   * the {@link SessionInfo} into a local database.
    */
   default void userAuthenticated(SessionInfo sessionInfo, HttpSession session) {}
 }
