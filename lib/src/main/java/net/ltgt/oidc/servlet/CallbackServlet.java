@@ -9,8 +9,11 @@ import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jose.proc.JWSVerificationKeySelector;
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.Request;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.TokenResponse;
+import com.nimbusds.oauth2.sdk.http.HTTPRequestSender;
+import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.http.JakartaServletUtils;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponseParser;
@@ -43,6 +46,11 @@ import org.jspecify.annotations.Nullable;
  * jakarta.servlet.ServletContext ServletContext} attribute under the name {@link
  * Configuration#CONTEXT_ATTRIBUTE_NAME}.
  *
+ * <p>If a {@link HTTPRequestSender} instance has been added as {@link
+ * jakarta.servlet.ServletContext ServletContext} attribute under the name {@link
+ * Utils#HTTP_REQUEST_SENDER_CONTEXT_ATTRIBUTE_NAME}, it'll be used to send requests to the OpenID
+ * Provider.
+ *
  * <p>Authentication state must have been put in the {@linkplain jakarta.servlet.http.HttpSession
  * session} by an {@link AuthenticationRedirector} (generally through the {@link LoginServlet} or an
  * {@linkplain AbstractAuthorizationFilter authorization filter}).
@@ -60,18 +68,38 @@ public class CallbackServlet extends HttpServlet {
 
   private Configuration configuration;
   private UserPrincipalFactory userPrincipalFactory;
+  private @Nullable HTTPRequestSender httpRequestSender;
+  private boolean httpRequestSenderExplicitlySet;
   private IDTokenValidator idTokenValidator;
 
   public CallbackServlet() {}
+
+  /**
+   * Constructs a servlet with the given configuration and {@link UserPrincipal} factory, and no
+   * HTTP request sender.
+   *
+   * <p>When this constructor is used, the servlet context attributes won't be read.
+   *
+   * <p>This is equivalent to {@code new CallbackServlet(configuration, userPrincipalFactory,
+   * null)}.
+   */
+  public CallbackServlet(Configuration configuration, UserPrincipalFactory userPrincipalFactory) {
+    this(configuration, userPrincipalFactory, null);
+  }
 
   /**
    * Constructs a servlet with the given configuration and {@link UserPrincipal} factory.
    *
    * <p>When this constructor is used, the servlet context attributes won't be read.
    */
-  public CallbackServlet(Configuration configuration, UserPrincipalFactory userPrincipalFactory) {
+  public CallbackServlet(
+      Configuration configuration,
+      UserPrincipalFactory userPrincipalFactory,
+      @Nullable HTTPRequestSender httpRequestSender) {
     this.configuration = requireNonNull(configuration);
     this.userPrincipalFactory = requireNonNull(userPrincipalFactory);
+    this.httpRequestSender = httpRequestSender;
+    this.httpRequestSenderExplicitlySet = true;
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
@@ -89,6 +117,12 @@ public class CallbackServlet extends HttpServlet {
     }
     if (userPrincipalFactory == null) {
       userPrincipalFactory = SimpleUserPrincipal.FACTORY;
+    }
+    if (!httpRequestSenderExplicitlySet) {
+      assert httpRequestSender == null;
+      httpRequestSender =
+          (HTTPRequestSender)
+              getServletContext().getAttribute(Utils.HTTP_REQUEST_SENDER_CONTEXT_ATTRIBUTE_NAME);
     }
     try {
       idTokenValidator =
@@ -168,7 +202,7 @@ public class CallbackServlet extends HttpServlet {
             .build();
     TokenResponse tokenResponse;
     try {
-      tokenResponse = OIDCTokenResponseParser.parse(tokenRequest.toHTTPRequest().send());
+      tokenResponse = OIDCTokenResponseParser.parse(send(tokenRequest));
     } catch (ParseException | IOException e) {
       sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error in token request", e);
       return;
@@ -202,7 +236,7 @@ public class CallbackServlet extends HttpServlet {
             successResponse.getOIDCTokens().getAccessToken());
     UserInfoResponse userInfoResponse;
     try {
-      userInfoResponse = UserInfoResponse.parse(userInfoRequest.toHTTPRequest().send());
+      userInfoResponse = UserInfoResponse.parse(send(userInfoRequest));
     } catch (ParseException | IOException e) {
       sendError(
           resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error in User Info request", e);
@@ -235,6 +269,14 @@ public class CallbackServlet extends HttpServlet {
     session.setAttribute(SessionInfo.SESSION_ATTRIBUTE_NAME, sessionInfo);
     userPrincipalFactory.userAuthenticated(sessionInfo, session);
     Utils.sendRedirect(resp, authenticationState.requestUri());
+  }
+
+  private HTTPResponse send(Request request) throws IOException {
+    if (httpRequestSender != null) {
+      return request.toHTTPRequest().send(httpRequestSender);
+    } else {
+      return request.toHTTPRequest().send();
+    }
   }
 
   @ForOverride

@@ -1,5 +1,6 @@
 package net.ltgt.oidc.servlet;
 
+import com.nimbusds.oauth2.sdk.http.HTTPRequestSender;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
@@ -7,6 +8,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.net.URI;
 
 public class Utils {
+
+  /**
+   * The name of the {@linkplain jakarta.servlet.ServletContext#setAttribute servlet context
+   * attribute} to register a {@link HTTPRequestSender} to be used to send requests to the OpenID
+   * Provider.
+   */
+  public static final String HTTP_REQUEST_SENDER_CONTEXT_ATTRIBUTE_NAME =
+      Utils.class.getName() + "#" + HTTPRequestSender.class.getName();
 
   /**
    * The name of the form parameter to pass a page's path to return to after login or logout.
