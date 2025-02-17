@@ -5,7 +5,7 @@ plugins {
 
 nexusPublishing {
     packageGroup = "net.ltgt.oidc"
-    useStaging = (version != Project.DEFAULT_VERSION)
+    useStaging = !version.toString().endsWith("-SNAPSHOT")
     repositories {
         sonatype()
     }
