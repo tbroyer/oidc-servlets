@@ -85,7 +85,7 @@ public class UserFilter extends HttpFilter {
   protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
       throws IOException, ServletException {
     var session = req.getSession(false);
-    if (session != null) {
+    if (req.getUserPrincipal() == null && session != null) {
       var sessionInfo = (SessionInfo) session.getAttribute(SessionInfo.SESSION_ATTRIBUTE_NAME);
       if (sessionInfo != null) {
         if (sessionInfo.getIDTokenClaims().getSessionID() != null
