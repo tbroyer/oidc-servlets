@@ -2,6 +2,7 @@ package net.ltgt.oidc.servlet;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.source.JWKSourceBuilder;
 import com.nimbusds.jose.proc.BadJOSEException;
@@ -53,6 +54,7 @@ public class BackchannelLogoutServlet extends HttpServlet {
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
+  @OverridingMethodsMustInvokeSuper
   @Override
   public void init() throws ServletException {
     if (loggedOutSessionStore == null) {

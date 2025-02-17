@@ -2,6 +2,7 @@ package net.ltgt.oidc.servlet;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.openid.connect.sdk.LogoutRequest;
 import jakarta.servlet.ServletException;
@@ -92,6 +93,7 @@ public class LogoutServlet extends HttpServlet {
     this.useLogoutState = useLogoutState;
   }
 
+  @OverridingMethodsMustInvokeSuper
   @Override
   public void init() throws ServletException {
     if (configuration == null) {

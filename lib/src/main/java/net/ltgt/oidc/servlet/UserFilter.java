@@ -2,6 +2,7 @@ package net.ltgt.oidc.servlet;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpFilter;
@@ -59,6 +60,7 @@ public class UserFilter extends HttpFilter {
         loggedOutSessionStore != null ? loggedOutSessionStore : NullLoggedOutSessionStore.INSTANCE;
   }
 
+  @OverridingMethodsMustInvokeSuper
   @Override
   public void init() throws ServletException {
     if (userPrincipalFactory == null) {
