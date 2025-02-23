@@ -11,8 +11,15 @@ dependencyResolutionManagement {
     }
 }
 
-include("lib", "example")
-
-project(":lib").name = "oidc-servlets"
+fun include(
+    projectPath: String,
+    projectDir: String,
+) {
+    include(projectPath)
+    project(projectPath).projectDir = file(projectDir)
+}
+include(":oidc-servlets", "lib")
+include(":oidc-servlets-rs", "rs")
+include(":example")
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

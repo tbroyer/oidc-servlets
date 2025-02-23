@@ -109,6 +109,9 @@ servletContext.addFilter("authenticated-user", IsAuthenticatedFilter.class)
     .addMappingForUrlPatterns(null, true, "/private/*");
 ```
 
+> [!NOTE]
+> If you use Jakarta RS in your application, you can also use the [OIDC-Servlets+RS](rs/README.md) companion library to manage authorizations on your Jakarta RS resources.
+
 To allow users on public pages to sign in, you can register the `LoginServlet`, and add to those pages either a link to that servlet, or an HTML form to do a `POST` request to that servlet, including the URL to return to after authentication in a `return-to` query-string or form parameter (if omitted, the user will be redirected to the root of the application, same as `return-to=/`):
 
 ```java

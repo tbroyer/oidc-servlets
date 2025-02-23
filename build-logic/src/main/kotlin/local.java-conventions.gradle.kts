@@ -53,6 +53,7 @@ tasks.withType<JavaCompile>().configureEach {
                 "jakarta.servlet.Filter.init",
                 "jakarta.servlet.GenericFilter.init",
             )
+            excludedFieldAnnotations.add("jakarta.ws.rs.core.Context")
         }
     }
 }

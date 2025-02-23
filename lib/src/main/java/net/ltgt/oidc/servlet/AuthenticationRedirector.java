@@ -13,6 +13,7 @@ import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.OIDCScopeValue;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.net.URI;
 import java.util.function.Consumer;
 import org.jspecify.annotations.Nullable;
@@ -65,19 +66,32 @@ public class AuthenticationRedirector {
       HttpServletResponse res,
       String returnTo,
       @Nullable Consumer<AuthenticationRequest.Builder> configureAuthenticationRequest) {
+    redirectToAuthenticationEndpoint(
+        req.getSession(),
+        returnTo,
+        configureAuthenticationRequest,
+        URI.create(req.getRequestURL().toString()),
+        uri -> Utils.sendRedirect(res, uri.toASCIIString()));
+  }
+
+  protected void redirectToAuthenticationEndpoint(
+      HttpSession session,
+      String returnTo,
+      @Nullable Consumer<AuthenticationRequest.Builder> configureAuthenticationRequest,
+      URI baseUri,
+      Consumer<URI> sendRedirect) {
     State state = new State();
     Nonce nonce = new Nonce();
     CodeVerifier codeVerifier = new CodeVerifier();
-    req.getSession()
-        .setAttribute(
-            AuthenticationState.SESSION_ATTRIBUTE_NAME,
-            new AuthenticationState(state, nonce, codeVerifier, returnTo));
+    session.setAttribute(
+        AuthenticationState.SESSION_ATTRIBUTE_NAME,
+        new AuthenticationState(state, nonce, codeVerifier, returnTo));
     AuthenticationRequest.Builder authenticationRequestBuilder =
         new AuthenticationRequest.Builder(
             ResponseType.CODE,
             new Scope(OIDCScopeValue.OPENID, OIDCScopeValue.PROFILE, OIDCScopeValue.EMAIL),
             configuration.getClientAuthentication().getClientID(),
-            URI.create(req.getRequestURL().toString()).resolve(callbackPath));
+            baseUri.resolve(callbackPath));
     if (configureAuthenticationRequest != null) {
       configureAuthenticationRequest.accept(authenticationRequestBuilder);
     }
@@ -88,7 +102,7 @@ public class AuthenticationRedirector {
         .nonce(nonce)
         // From RFC: If the client is capable of using S256, it MUST use S256.
         .codeChallenge(codeVerifier, CodeChallengeMethod.S256);
-    Utils.sendRedirect(res, authenticationRequestBuilder.build().toURI().toASCIIString());
+    sendRedirect.accept(authenticationRequestBuilder.build().toURI());
   }
 
   /**
