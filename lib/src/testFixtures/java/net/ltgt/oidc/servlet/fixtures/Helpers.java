@@ -1,4 +1,4 @@
-package net.ltgt.oidc.servlet.functional;
+package net.ltgt.oidc.servlet.fixtures;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;

@@ -3,14 +3,15 @@ package net.ltgt.oidc.servlet.functional;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static java.util.Objects.requireNonNull;
-import static net.ltgt.oidc.servlet.functional.Helpers.login;
-import static net.ltgt.oidc.servlet.functional.Helpers.logoutFromIdP;
+import static net.ltgt.oidc.servlet.fixtures.Helpers.login;
+import static net.ltgt.oidc.servlet.fixtures.Helpers.logoutFromIdP;
 
 import net.ltgt.oidc.servlet.BackchannelLogoutServlet;
 import net.ltgt.oidc.servlet.BackchannelLogoutSessionListener;
 import net.ltgt.oidc.servlet.InMemoryLoggedOutSessionStore;
 import net.ltgt.oidc.servlet.IsAuthenticatedFilter;
 import net.ltgt.oidc.servlet.LoggedOutSessionStore;
+import net.ltgt.oidc.servlet.fixtures.WebDriverExtension;
 import org.eclipse.jetty.session.SessionConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

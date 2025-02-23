@@ -2,12 +2,13 @@ package net.ltgt.oidc.servlet.functional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
-import static net.ltgt.oidc.servlet.functional.Helpers.login;
+import static net.ltgt.oidc.servlet.fixtures.Helpers.login;
 import static org.openqa.selenium.support.ui.ExpectedConditions.stalenessOf;
 
 import java.time.Duration;
 import net.ltgt.oidc.servlet.IsAuthenticatedFilter;
 import net.ltgt.oidc.servlet.LogoutServlet;
+import net.ltgt.oidc.servlet.fixtures.WebDriverExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;

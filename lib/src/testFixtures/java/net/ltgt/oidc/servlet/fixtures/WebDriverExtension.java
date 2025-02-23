@@ -1,4 +1,4 @@
-package net.ltgt.oidc.servlet.functional;
+package net.ltgt.oidc.servlet.fixtures;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
