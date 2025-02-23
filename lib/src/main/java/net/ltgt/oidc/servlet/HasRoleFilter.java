@@ -7,10 +7,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * Ensures the user {@linkplain HttpServletRequest#isUserInRole has a given role}.
+ * Ensures the user {@linkplain UserPrincipal#hasRole has a given role}.
  *
  * <p>This filter should be installed <i>after</i> the {@link UserFilter} as it relies on {@link
- * HttpServletRequest#isUserInRole}.
+ * HttpServletRequest#getUserPrincipal()}.
  */
 public class HasRoleFilter extends AbstractAuthorizationFilter {
   /** Name of the init parameter used to configure the expected user role. */
@@ -65,6 +65,10 @@ public class HasRoleFilter extends AbstractAuthorizationFilter {
 
   @Override
   protected final boolean isAuthorized(HttpServletRequest req) {
-    return req.isUserInRole(role);
+    if (req.getUserPrincipal() instanceof UserPrincipal userPrincipal) {
+      return userPrincipal.hasRole(role);
+    } else {
+      return false;
+    }
   }
 }
