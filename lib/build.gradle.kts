@@ -16,10 +16,7 @@ dependencies {
     testFixturesApi(platform(libs.jetty.ee10.bom))
     testFixturesApi(libs.jetty.servlet)
     testFixturesApi(libs.selenium)
-    testFixturesImplementation(libs.truth) {
-        // See https://github.com/google/truth/issues/333
-        exclude(group = "junit", module = "junit")
-    }
+    testFixturesImplementation(libs.truth)
 }
 
 testing {
@@ -31,10 +28,7 @@ testing {
             dependencies {
                 implementation(project())
                 implementation(testFixtures(project()))
-                implementation(libs.truth) {
-                    // See https://github.com/google/truth/issues/333
-                    exclude(group = "junit", module = "junit")
-                }
+                implementation(libs.truth)
             }
             targets.configureEach {
                 testTask {
