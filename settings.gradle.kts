@@ -18,6 +18,7 @@ fun include(
     include(projectPath)
     project(projectPath).projectDir = file(projectDir)
 }
+include(":oidc-servlets-bom", "platform")
 include(":oidc-servlets", "lib")
 include(":oidc-servlets-rs", "rs")
 include(":example")

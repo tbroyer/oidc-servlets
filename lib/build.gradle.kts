@@ -6,6 +6,8 @@ plugins {
 }
 
 dependencies {
+    api(platform(projects.oidcServletsBom))
+
     api(libs.jspecify)
     api(libs.errorprone.annotations)
     api(libs.nimbus.oidcSdk)

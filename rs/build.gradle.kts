@@ -5,6 +5,8 @@ plugins {
 }
 
 dependencies {
+    api(platform(projects.oidcServletsBom))
+
     api(projects.oidcServlets)
     api(libs.jakarta.rsApi)
     api(libs.jakarta.annotationApi)
