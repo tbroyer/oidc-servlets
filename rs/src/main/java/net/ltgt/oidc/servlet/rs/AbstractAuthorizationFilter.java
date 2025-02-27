@@ -4,7 +4,7 @@ import com.google.errorprone.annotations.ForOverride;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import jakarta.annotation.Priority;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.ClientErrorException;
+import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
@@ -91,9 +91,10 @@ public abstract class AbstractAuthorizationFilter implements ContainerRequestFil
    * This method is called whenever is not authorized and the request is <b>not</b> a {@linkplain
    * Utils#isSafeMethod safe} {@linkplain Utils#isNavigation navigation} request.
    *
-   * <p>The default implementation simply throws {@code new ClientErrorException(UNAUTHORIZED)}.
-   * This is not strictly HTTP-compliant as it's missing the {@code WWW-Authenticate} response
-   * header, but is a good way to signal the error to JavaScript clients making an AJAX request.
+   * <p>The default implementation simply throws a {@link NotAuthorizedException} without a {@code
+   * WWW-Authenticate} response header. This is not strictly HTTP-compliant as it's missing the
+   * {@code WWW-Authenticate} response header, but is a good way to signal the error to JavaScript
+   * clients making an AJAX request.
    *
    * @see #redirectToAuthenticationEndpoint
    * @see HasRoleFilter
@@ -101,6 +102,6 @@ public abstract class AbstractAuthorizationFilter implements ContainerRequestFil
   @ForOverride
   protected void sendUnauthorized(ContainerRequestContext containerRequestContext) {
     // XXX: this is not http-compliant as it's missing WWW-Authenticate
-    throw new ClientErrorException(Response.Status.UNAUTHORIZED);
+    throw new NotAuthorizedException(Response.status(Response.Status.UNAUTHORIZED).build());
   }
 }
