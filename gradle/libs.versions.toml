@@ -28,6 +28,10 @@ resteasy-core = { module = "org.jboss.resteasy:resteasy-core" }
 selenium = "org.seleniumhq.selenium:selenium-java:4.29.0"
 truth = "com.google.truth:truth:1.4.4"
 
+# Versions used in build-logic, libraries added here for Dependabot
+googleJavaFormat = { module = "com.google.googlejavaformat:google-java-format", version.ref = "googleJavaFormat" }
+ktlint = { module = "com.pinterest.ktlint:ktlint-cli", version.ref = "ktlint" }
+
 # Used in bundle below
 errorprone-core = { module = "com.google.errorprone:error_prone_core", version.ref = "errorprone" }
 nullaway = { module = "com.uber.nullaway:nullaway", version.ref = "nullaway" }
