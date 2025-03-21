@@ -1,6 +1,7 @@
 package net.ltgt.oidc.servlet.fixtures;
 
 import static java.util.Objects.requireNonNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.nimbusds.oauth2.sdk.GeneralException;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
@@ -23,7 +24,6 @@ import org.eclipse.jetty.server.Server;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.opentest4j.TestAbortedException;
 
 public class WebServerExtension implements BeforeEachCallback, AfterEachCallback {
   public static final String CALLBACK_PATH = "/callback";
@@ -53,8 +53,8 @@ public class WebServerExtension implements BeforeEachCallback, AfterEachCallback
     try {
       providerMetadata = OIDCProviderMetadata.resolve(new Issuer(issuer));
     } catch (GeneralException | IOException e) {
-      throw new TestAbortedException(
-          "Can't load OIDC provider metadata. Is Keycloak started and configured?", e);
+      throw (RuntimeException)
+          fail("Can't load OIDC provider metadata. Is Keycloak started and configured?", e);
     }
     port = Integer.getInteger("test.port", 8000);
     var configuration =

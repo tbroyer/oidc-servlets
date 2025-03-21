@@ -1,15 +1,16 @@
 services:
   keycloak:
     image: "quay.io/keycloak/keycloak:26.1"
-    user: "${UID:-1000}:${GID:-1000}"
-    command: ["start-dev"]
+    # reuse-connections=false is for functional tests, where the application server is restarted between each test
+    # using a connection pool and trying to reuse connections leads to errors for backchannel logout requests
+    command: ["start-dev", "--spi-connections-http-client-default-reuse-connections=false"]
     ports:
       - "8080:8080"
     environment:
       - "KC_BOOTSTRAP_ADMIN_USERNAME=kcadmin"
       - "KC_BOOTSTRAP_ADMIN_PASSWORD=kcadmin"
     volumes:
-      - "./.docker/keycloak:/opt/keycloak/data"
+      - "keycloak-data:/opt/keycloak/data"
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
@@ -27,3 +28,6 @@ services:
       - "APP_CLIENT_SECRET=example"
     volumes:
       - "./keycloak/config/:/config/:ro"
+
+volumes:
+  keycloak-data:
