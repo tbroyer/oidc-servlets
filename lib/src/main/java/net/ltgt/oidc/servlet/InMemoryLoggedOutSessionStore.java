@@ -1,5 +1,7 @@
 package net.ltgt.oidc.servlet;
 
+import static java.util.function.Predicate.not;
+
 import com.google.errorprone.annotations.ForOverride;
 import com.nimbusds.openid.connect.sdk.claims.SessionID;
 import java.util.Set;
@@ -66,7 +68,9 @@ public class InMemoryLoggedOutSessionStore implements LoggedOutSessionStore {
           if (old.size() == 1) {
             return null;
           }
-          return old.stream().filter(sessionId::equals).collect(Collectors.toUnmodifiableSet());
+          return old.stream()
+              .filter(not(sessionId::equals))
+              .collect(Collectors.toUnmodifiableSet());
         });
   }
 
@@ -79,7 +83,8 @@ public class InMemoryLoggedOutSessionStore implements LoggedOutSessionStore {
             // Strange, shouldn't have happened… treat as an acquire
             return Set.of(newSessionId);
           }
-          return Stream.concat(old.stream().filter(oldSessionId::equals), Stream.of(newSessionId))
+          return Stream.concat(
+                  old.stream().filter(not(oldSessionId::equals)), Stream.of(newSessionId))
               .collect(Collectors.toUnmodifiableSet());
         });
   }
