@@ -3,10 +3,10 @@
 errorprone = "2.37.0"
 jetty = "12.0.18"
 junitJupiter = "5.12.1"
-nullaway = "0.12.4"
+nullaway = "0.12.6"
 
 # Versions used in build-logic
-googleJavaFormat = "1.25.2"
+googleJavaFormat = "1.26.0"
 ktlint = "1.5.0"
 
 [libraries]
@@ -24,7 +24,7 @@ nimbus-oidcSdk = "com.nimbusds:oauth2-oidc-sdk:11.23.1"
 nullaway-annotations = { module = "com.uber.nullaway:nullaway-annotations", version.ref = "nullaway" }
 resteasy-bom = "org.jboss.resteasy:resteasy-bom:6.2.12.Final"
 resteasy-core = { module = "org.jboss.resteasy:resteasy-core" }
-selenium = "org.seleniumhq.selenium:selenium-java:4.29.0"
+selenium = "org.seleniumhq.selenium:selenium-java:4.30.0"
 truth = "com.google.truth:truth:1.4.4"
 
 # Versions used in build-logic, libraries added here for Dependabot
