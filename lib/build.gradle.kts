@@ -3,6 +3,7 @@ plugins {
     id("local.maven-publish-conventions")
     `java-library`
     `java-test-fixtures`
+    alias(libs.plugins.testRetry)
 }
 
 dependencies {
@@ -43,6 +44,10 @@ testing {
                     systemProperty("test.issuer", "http://localhost:8080/realms/example")
                     systemProperty("test.clientId", "app")
                     systemProperty("test.clientSecret", "example")
+
+                    retry {
+                        maxRetries = 2
+                    }
                 }
             }
         }
