@@ -24,7 +24,7 @@ public class WebDriverExtension implements ParameterResolver {
     var driver = new ChromeDriver(new ChromeOptions().addArguments("--headless"));
     extensionContext
         .getStore(ExtensionContext.Namespace.GLOBAL)
-        .put(parameterContext, (ExtensionContext.Store.CloseableResource) driver::quit);
+        .put(parameterContext, (AutoCloseable) driver::quit);
     return driver;
   }
 }
