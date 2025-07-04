@@ -1,6 +1,6 @@
 services:
   keycloak:
-    image: "quay.io/keycloak/keycloak:26.2"
+    image: "quay.io/keycloak/keycloak:26.3"
     # reuse-connections=false is for functional tests, where the application server is restarted between each test
     # using a connection pool and trying to reuse connections leads to errors for backchannel logout requests
     command: ["start-dev", "--spi-connections-http-client-default-reuse-connections=false"]
