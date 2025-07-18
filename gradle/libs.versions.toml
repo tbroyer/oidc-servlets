@@ -7,7 +7,7 @@ nullaway = "0.12.7"
 
 # Versions used in build-logic
 googleJavaFormat = "1.28.0"
-ktlint = "1.6.0"
+ktlint = "1.7.0"
 
 [libraries]
 errorprone-annotations = { module = "com.google.errorprone:error_prone_annotations", version.ref = "errorprone" }
