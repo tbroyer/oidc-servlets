@@ -43,7 +43,7 @@ public class SpaFilter extends HttpFilter {
   private static class NotFoundCatcherResponse extends HttpServletResponseWrapper {
     boolean error;
 
-    public NotFoundCatcherResponse(HttpServletResponse res) {
+    NotFoundCatcherResponse(HttpServletResponse res) {
       super(res);
     }
 
