@@ -83,10 +83,12 @@ public class BackchannelLogoutSessionListener
 
   @Override
   public void sessionIdChanged(HttpSessionEvent event, String oldSessionId) {
-    var sid =
-        ((SessionInfo) event.getSession().getAttribute(SessionInfo.SESSION_ATTRIBUTE_NAME))
-            .getIDTokenClaims()
-            .getSessionID();
+    var sessionInfo =
+        (SessionInfo) event.getSession().getAttribute(SessionInfo.SESSION_ATTRIBUTE_NAME);
+    if (sessionInfo == null) {
+      return;
+    }
+    var sid = sessionInfo.getIDTokenClaims().getSessionID();
     var loggedOutSessionStore = getLoggedOutSessionStore(event.getSession());
     if (sid != null && loggedOutSessionStore != null) {
       loggedOutSessionStore.renew(sid, oldSessionId, event.getSession().getId());
