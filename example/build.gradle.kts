@@ -9,6 +9,7 @@ dependencies {
     implementation(platform(libs.jetty.ee10.bom))
     implementation(libs.jetty.servlet)
     implementation(libs.jetty.jsp)
+    runtimeOnly(libs.jetty.slf4jImpl)
 }
 
 tasks {
