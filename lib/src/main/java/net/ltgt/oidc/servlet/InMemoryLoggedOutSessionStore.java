@@ -23,7 +23,9 @@ public class InMemoryLoggedOutSessionStore implements LoggedOutSessionStore {
   @Override
   public void logout(SessionID sessionID) {
     var loggedOutSessions = loggedInSessions.remove(sessionID);
-    doLogout(loggedOutSessions);
+    if (loggedOutSessions != null) {
+      doLogout(loggedOutSessions);
+    }
   }
 
   /**
