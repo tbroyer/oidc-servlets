@@ -11,13 +11,9 @@ dependencies {
     }
 }
 
-publishing {
-    publications {
-        withType<MavenPublication>().configureEach {
-            pom {
-                name = "OIDC Servlets BOM"
-                description = "Bill of Materials for OIDC-Servlets libraries"
-            }
-        }
+mavenPublishing {
+    pom {
+        name = "OIDC Servlets BOM"
+        description = "Bill of Materials for OIDC-Servlets libraries"
     }
 }

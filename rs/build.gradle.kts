@@ -51,13 +51,9 @@ tasks {
     }
 }
 
-publishing {
-    publications {
-        withType<MavenPublication>().configureEach {
-            pom {
-                name = "OIDC Servlets+RS"
-                description = "Jakarta RS filters as a companion library to OIDC-Servlets"
-            }
-        }
+mavenPublishing {
+    pom {
+        name = "OIDC Servlets+RS"
+        description = "Jakarta RS filters as a companion library to OIDC-Servlets"
     }
 }

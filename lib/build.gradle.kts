@@ -61,14 +61,10 @@ tasks {
     }
 }
 
-publishing {
-    publications {
-        withType<MavenPublication>().configureEach {
-            pom {
-                name = "OIDC Servlets"
-                description = "Servlets implementing OpenID Connect, through the Nimbus SDK"
-            }
-        }
+mavenPublishing {
+    pom {
+        name = "OIDC Servlets"
+        description = "Servlets implementing OpenID Connect, through the Nimbus SDK"
     }
 }
 
@@ -77,3 +73,6 @@ publishing {
 val javaComponent = components["java"] as AdhocComponentWithVariants
 javaComponent.withVariantsFromConfiguration(configurations.testFixturesApiElements.get()) { skip() }
 javaComponent.withVariantsFromConfiguration(configurations.testFixturesRuntimeElements.get()) { skip() }
+// Workaround for https://github.com/vanniktech/gradle-maven-publish-plugin/issues/779
+mavenPublishing.configureBasedOnAppliedPlugins()
+javaComponent.withVariantsFromConfiguration(configurations["testFixturesSourcesElements"]) { skip() }
