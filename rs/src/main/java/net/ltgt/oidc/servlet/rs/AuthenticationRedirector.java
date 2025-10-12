@@ -16,10 +16,10 @@ import org.jspecify.annotations.Nullable;
  * <p>An instance of this class needs to be added as a {@link jakarta.servlet.ServletContext
  * ServletContext} attribute under the name {@link #CONTEXT_ATTRIBUTE_NAME}, to be used by the
  * {@linkplain net.ltgt.oidc.servlet.AbstractAuthorizationFilter servlet authorization filters},
- * {@linkplain net.ltgt.oidc.servlet.rs.AbstractAuthorizationFilter Jakarta-RS authorization
- * filters}, or the {@link LoginServlet}.
+ * {@linkplain net.ltgt.oidc.servlet.rs.AbstractAuthorizationFilter JAX-RS authorization filters},
+ * or the {@link LoginServlet}.
  *
- * <p>In other words, if you're using Jakarta RS, then use an instance of this class instead of than
+ * <p>In other words, if you're using JAX-RS, then use an instance of this class instead of than
  * {@link net.ltgt.oidc.servlet.AuthenticationRedirector}.
  *
  * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html">OpenID Connect Core 1.0</a>

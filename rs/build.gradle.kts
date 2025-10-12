@@ -54,6 +54,6 @@ tasks {
 mavenPublishing {
     pom {
         name = "OIDC Servlets+RS"
-        description = "Jakarta RS filters as a companion library to OIDC-Servlets"
+        description = "JAX-RS filters as a companion library to OIDC-Servlets"
     }
 }

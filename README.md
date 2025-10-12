@@ -19,7 +19,7 @@ It fulfills the following needs:
 * A public (authentication-aware, but not requiring authentication) homepage
 * A private (requiring authentication) page, accessible to any registered user
 * A private (requiring authentication) admin page, only accessible to administrator users
-* A single API servlet that can tell users apart and handle authorizations (depending on projects this could be Jakarta RS or GraphQL for example)
+* A single API servlet that can tell users apart and handle authorizations (depending on projects this could be JAX-RS or GraphQL for example)
 * Static resources don't necessarily need authentication (more precisely, subresources –whether static or not, though most likely they are– should not redirect for authentication but rather either be served anyway or just blocked, both behaviors should be possible depending on needs)
 * Authentication should work well with internal servlet forwarding, as that's how I serve the same HTML web page for various URLs for Single Page Applications (SPA) that are fully client-side rendered (CSR); more precisely, the URL to redirect to after authentication should be the originally requested URL and not the one the request has been forwarded to.
 * Dependency-injection friendly
@@ -110,7 +110,7 @@ servletContext.addFilter("authenticated-user", IsAuthenticatedFilter.class)
 ```
 
 > [!NOTE]
-> If you use Jakarta RS in your application, you can also use the [OIDC-Servlets+RS](rs/README.md) companion library to manage authorizations on your Jakarta RS resources.
+> If you use JAX-RS in your application, you can also use the [OIDC-Servlets+RS](rs/README.md) companion library to manage authorizations on your JAX-RS resources.
 
 To allow users on public pages to sign in, you can register the `LoginServlet`, and add to those pages either a link to that servlet, or an HTML form to do a `POST` request to that servlet, including the URL to return to after authentication in a `return-to` query-string or form parameter (if omitted, the user will be redirected to the root of the application, same as `return-to=/`):
 

@@ -1,6 +1,6 @@
 # oidc-servlets-rs
 
-OIDC-Servlets+RS is a companion library to [OIDC-Servlets](../README.md) providing Jakarta RS filters to manage authorizations on Jakarta RS resources (in a servlets environment).
+OIDC-Servlets+RS is a companion library to [OIDC-Servlets](../README.md) providing JAX-RS filters to manage authorizations on JAX-RS resources (in a servlets environment).
 
 ## Usage
 
@@ -8,7 +8,7 @@ Add dependencies on [`net.ltgt.oidc:oidc-servlets`](https://central.sonatype.com
 
 Configure the `UserFilter` and `CallbackServlet` from [OIDC-Servlets](../README.md#usage), but use the `AuthenticationRedirector` subclass from OIDC-Servlets+RS rather than the one from OIDC-Servlets. You can also use the other servlets from OIDC-Servlets: `LogoutServlet`, `LogoutCallbackServlet`, and `BackchannelLogoutServlet`.
 
-You can then use the `IsAuthenticatedFilter` and `HasRoleFilter` Jakarta RS filters.
+You can then use the `IsAuthenticatedFilter` and `HasRoleFilter` JAX-RS filters.
 
 The `IsAuthenticatedFilter` requires an authenticated user. Annotating your resource method, resource class, or application class with `@IsAuthenticated` to bind this filter to your resources.
 

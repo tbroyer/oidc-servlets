@@ -9,8 +9,8 @@ import net.ltgt.oidc.servlet.UserPrincipal;
 /**
  * Ensures the user {@linkplain SecurityContext#getUserPrincipal is authenticated}.
  *
- * <p>The Jakarta RS resource class or method must be annotated with {@link IsAuthenticated} to
- * apply this filter.
+ * <p>The JAX-RS resource class or method must be annotated with {@link IsAuthenticated} to apply
+ * this filter.
  *
  * @see IsAuthenticated
  */
