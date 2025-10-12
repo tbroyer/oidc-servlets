@@ -18,6 +18,7 @@ dependencies {
     testFixturesApi(platform(libs.jetty.bom))
     testFixturesApi(platform(libs.jetty.ee10.bom))
     testFixturesApi(libs.jetty.servlet)
+    testFixturesRuntimeOnly(libs.jetty.slf4jImpl)
     testFixturesApi(libs.selenium)
     testFixturesImplementation(libs.truth)
 }
