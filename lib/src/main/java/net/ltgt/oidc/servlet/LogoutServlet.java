@@ -151,7 +151,7 @@ public class LogoutServlet extends HttpServlet {
     var logoutRequest =
         new LogoutRequest(
             configuration.getProviderMetadata().getEndSessionEndpointURI(),
-            sessionInfo.getOIDCTokens().getIDToken(),
+            sessionInfo.getIDToken(),
             postLogoutRedirectPath != null
                 ? URI.create(req.getRequestURL().toString()).resolve(postLogoutRedirectPath)
                 : null,

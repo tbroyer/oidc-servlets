@@ -4,12 +4,14 @@ import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.nimbusds.oauth2.sdk.GeneralException;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import net.ltgt.oidc.servlet.AuthenticationRedirector;
@@ -31,6 +33,7 @@ public class WebServerExtension implements BeforeEachCallback, AfterEachCallback
   public static final String BACK_CHANNEL_LOGOUT_CALLBACK_PATH = "/backchannel-logout";
 
   private final OIDCProviderMetadata providerMetadata;
+  private final ClientAuthentication clientAuthentication;
   private final int port;
   private final Server server;
 
@@ -40,6 +43,10 @@ public class WebServerExtension implements BeforeEachCallback, AfterEachCallback
 
   public OIDCProviderMetadata getProviderMetadata() {
     return providerMetadata;
+  }
+
+  public ClientAuthentication getClientAuthentication() {
+    return clientAuthentication;
   }
 
   public String getURI(String path) {
@@ -56,13 +63,12 @@ public class WebServerExtension implements BeforeEachCallback, AfterEachCallback
       throw (RuntimeException)
           fail("Can't load OIDC provider metadata. Is Keycloak started and configured?", e);
     }
+    clientAuthentication =
+        new ClientSecretBasic(
+            new ClientID(Objects.requireNonNull(System.getProperty("test.clientId"))),
+            new Secret(Objects.requireNonNull(System.getProperty("test.clientSecret"))));
     port = Integer.getInteger("test.port", 8000);
-    var configuration =
-        new Configuration(
-            providerMetadata,
-            new ClientSecretBasic(
-                new ClientID(requireNonNull(System.getProperty("test.clientId"))),
-                new Secret(requireNonNull(System.getProperty("test.clientSecret")))));
+    var configuration = new Configuration(providerMetadata, clientAuthentication);
     server = new Server(port);
     var contextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
     server.setHandler(contextHandler);

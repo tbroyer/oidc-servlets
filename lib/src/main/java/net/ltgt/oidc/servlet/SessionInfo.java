@@ -2,33 +2,33 @@ package net.ltgt.oidc.servlet;
 
 import static java.util.Objects.requireNonNull;
 
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
-import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 import java.io.Serial;
 import java.io.Serializable;
 
 public final class SessionInfo implements Serializable {
   static final String SESSION_ATTRIBUTE_NAME = SessionInfo.class.getName();
 
-  private final OIDCTokens oidcTokens;
+  private final JWT idToken;
   private final IDTokenClaimsSet idTokenClaims;
   private final UserInfo userInfo;
 
   public SessionInfo(
-      OIDCTokens oidcTokens, //
-      IDTokenClaimsSet idTokenClaims,
+      JWT idToken, //
+      IDTokenClaimsSet idTokenClaims, //
       UserInfo userInfo //
       ) {
-    this.oidcTokens = requireNonNull(oidcTokens);
+    this.idToken = idToken;
     this.idTokenClaims = requireNonNull(idTokenClaims);
     this.userInfo = requireNonNull(userInfo);
   }
 
-  public OIDCTokens getOIDCTokens() {
-    return oidcTokens;
+  public JWT getIDToken() {
+    return idToken;
   }
 
   public IDTokenClaimsSet getIDTokenClaims() {
@@ -41,19 +41,18 @@ public final class SessionInfo implements Serializable {
 
   @Serial
   private Object writeReplace() {
-    return new SerializableSessionInfo(
-        oidcTokens.toJSONObject().toJSONString(), userInfo.toJSONString());
+    return new SerializableSessionInfo(idToken.serialize(), userInfo.toJSONString());
   }
 
-  private record SerializableSessionInfo(String serializedOidcTokens, String serializedUserInfo)
+  private record SerializableSessionInfo(String idToken, String serializedUserInfo)
       implements Serializable {
     @Serial
     Object readResolve() {
       try {
-        var oidcTokens = OIDCTokens.parse(JSONObjectUtils.parse(serializedOidcTokens()));
+        var parsedIdToken = JWTParser.parse(idToken());
+        var idTokenClaims = new IDTokenClaimsSet(parsedIdToken.getJWTClaimsSet());
         var userInfo = UserInfo.parse(serializedUserInfo());
-        return new SessionInfo(
-            oidcTokens, new IDTokenClaimsSet(oidcTokens.getIDToken().getJWTClaimsSet()), userInfo);
+        return new SessionInfo(parsedIdToken, idTokenClaims, userInfo);
       } catch (ParseException | java.text.ParseException e) {
         throw new RuntimeException(e);
       }

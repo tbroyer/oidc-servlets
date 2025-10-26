@@ -23,6 +23,7 @@ It fulfills the following needs:
 * Static resources don't necessarily need authentication (more precisely, subresources –whether static or not, though most likely they are– should not redirect for authentication but rather either be served anyway or just blocked, both behaviors should be possible depending on needs)
 * Authentication should work well with internal servlet forwarding, as that's how I serve the same HTML web page for various URLs for Single Page Applications (SPA) that are fully client-side rendered (CSR); more precisely, the URL to redirect to after authentication should be the originally requested URL and not the one the request has been forwarded to.
 * Dependency-injection friendly
+* OAuth tokens (access token and refresh token) obtained at authentication time should be exposed to the application and have their own lifecycle.
 
 ## Example application
 
@@ -211,6 +212,22 @@ contextHandler.setAttribute(
             session.invalidate();
           }
         }
+      }
+    });
+```
+
+### OAuth tokens
+
+To get the access token and refresh token obtained at authentication time, add an `OAuthTokensHandler` implementation as a `ServletContext` attribute. You will then be able to access protected resources using the access token, and obtain new access tokens with the refresh token, but will be responsible for revoking the access tokens when no longer needed (e.g. when the session expires); this is all out of scope of this library though. The default behavior is to directly revoke the access token after it's been used to access the User Info endpoint.
+
+Here's an example that stores the tokens in the session:
+```java
+servletContext.setAttribute(
+    OAuthTokensHandler.CONTEXT_ATTRIBUTE_NAME,
+    new OAuthTokensHandler() {
+      @Override
+      public void tokensAcquired(AccessTokenResponse tokenResponse, HttpSession session) {
+        session.setAttribute(TOKENS_SESSION_ATTRIBUTE_NAME, tokenResponse);
       }
     });
 ```

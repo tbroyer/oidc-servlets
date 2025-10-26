@@ -63,6 +63,11 @@ import org.jspecify.annotations.Nullable;
  * ServletContext}, it'll be called to possibly load additional data to the session, that can later
  * be made available through the {@link UserPrincipal}.
  *
+ * <p>If an {@link OAuthTokensHandler} is available in the {@link jakarta.servlet.ServletContext
+ * ServletContext}, it'll be called to possibly store the OAuth tokens in the session for later use
+ * to access protected resources. Otherwise, a {@link RevokingOAuthTokensHandler} will immediately
+ * revoke the tokens so they're unusable in case they leak somehow.
+ *
  * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html">OpenID Connect Core 1.0</a>
  */
 public class CallbackServlet extends HttpServlet {
@@ -72,6 +77,7 @@ public class CallbackServlet extends HttpServlet {
   private @Nullable HTTPRequestSender httpRequestSender;
   private boolean httpRequestSenderExplicitlySet;
   private IDTokenValidator idTokenValidator;
+  private OAuthTokensHandler oauthTokensHandler;
 
   public CallbackServlet() {}
 
@@ -125,6 +131,14 @@ public class CallbackServlet extends HttpServlet {
       httpRequestSender =
           (HTTPRequestSender)
               getServletContext().getAttribute(Utils.HTTP_REQUEST_SENDER_CONTEXT_ATTRIBUTE_NAME);
+    }
+    if (oauthTokensHandler == null) {
+      oauthTokensHandler =
+          (OAuthTokensHandler)
+              getServletContext().getAttribute(OAuthTokensHandler.CONTEXT_ATTRIBUTE_NAME);
+    }
+    if (oauthTokensHandler == null) {
+      oauthTokensHandler = new RevokingOAuthTokensHandler(configuration, httpRequestSender);
     }
     try {
       idTokenValidator =
@@ -266,10 +280,12 @@ public class CallbackServlet extends HttpServlet {
       }
     }
     req.changeSessionId();
-    var sessionInfo = new SessionInfo(successResponse.getOIDCTokens(), idTokenClaims, userInfo);
+    var sessionInfo =
+        new SessionInfo(successResponse.getOIDCTokens().getIDToken(), idTokenClaims, userInfo);
     HttpSession session = req.getSession();
     session.setAttribute(SessionInfo.SESSION_ATTRIBUTE_NAME, sessionInfo);
     userPrincipalFactory.userAuthenticated(sessionInfo, session);
+    oauthTokensHandler.tokensAcquired(successResponse, session);
     Utils.sendRedirect(resp, authenticationState.requestUri());
   }
 
