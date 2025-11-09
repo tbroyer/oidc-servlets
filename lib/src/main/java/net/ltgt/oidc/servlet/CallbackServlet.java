@@ -175,6 +175,15 @@ public class CallbackServlet extends HttpServlet {
       sendError(resp, HttpServletResponse.SC_BAD_REQUEST, "Error parsing parameters", e);
       return;
     }
+    if (!response.indicatesSuccess()) {
+      sendError(
+          resp,
+          HttpServletResponse.SC_BAD_REQUEST,
+          response.toErrorResponse().getErrorObject().getCode(),
+          null);
+      return;
+    }
+    var code = response.toSuccessResponse().getAuthorizationCode();
     var authenticationState =
         Optional.ofNullable(req.getSession(false))
             .map(
@@ -186,7 +195,28 @@ public class CallbackServlet extends HttpServlet {
                   return state;
                 })
             .orElse(null);
+    // Do not check authentication state yet; exchange code first to prevent browser swapping attack
+    // If the authentication state is missing, the PKCE code verifier will be missing as well, and
+    // this should invalidate the authorization code
+    var tokenRequest =
+        new TokenRequest.Builder(
+                configuration.getProviderMetadata().getTokenEndpointURI(),
+                configuration.getClientAuthentication(),
+                new AuthorizationCodeGrant(
+                    code,
+                    URI.create(req.getRequestURL().toString()),
+                    authenticationState == null ? null : authenticationState.codeVerifier()))
+            .build();
+    TokenResponse tokenResponse;
+    try {
+      tokenResponse = OIDCTokenResponseParser.parse(send(tokenRequest));
+    } catch (ParseException | IOException e) {
+      sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error in token request", e);
+      return;
+    }
+    // Now that we "used" the authorization code, we can check the authentication state for CSRF
     if (authenticationState == null) {
+      maybeRevokeTokens(tokenResponse);
       sendError(
           resp,
           HttpServletResponse.SC_BAD_REQUEST,
@@ -195,32 +225,8 @@ public class CallbackServlet extends HttpServlet {
       return;
     }
     if (!Objects.equals(response.getState(), authenticationState.state())) {
+      maybeRevokeTokens(tokenResponse);
       sendError(resp, HttpServletResponse.SC_BAD_REQUEST, "State mismatch", null);
-      return;
-    }
-    if (!response.indicatesSuccess()) {
-      sendError(
-          resp,
-          HttpServletResponse.SC_BAD_REQUEST,
-          response.toErrorResponse().getErrorObject().getCode(),
-          null);
-      return;
-    }
-    var code = response.toSuccessResponse().getAuthorizationCode();
-    var tokenRequest =
-        new TokenRequest.Builder(
-                configuration.getProviderMetadata().getTokenEndpointURI(),
-                configuration.getClientAuthentication(),
-                new AuthorizationCodeGrant(
-                    code,
-                    URI.create(req.getRequestURL().toString()),
-                    authenticationState.codeVerifier()))
-            .build();
-    TokenResponse tokenResponse;
-    try {
-      tokenResponse = OIDCTokenResponseParser.parse(send(tokenRequest));
-    } catch (ParseException | IOException e) {
-      sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error in token request", e);
       return;
     }
     if (!tokenResponse.indicatesSuccess()) {
@@ -239,9 +245,11 @@ public class CallbackServlet extends HttpServlet {
           idTokenValidator.validate(
               successResponse.getOIDCTokens().getIDToken(), authenticationState.nonce());
     } catch (BadJOSEException e) {
+      revokeTokens(successResponse);
       sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error validating ID Token", e);
       return;
     } catch (JOSEException e) {
+      revokeTokens(successResponse);
       sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Invalid ID Token", e);
       return;
     }
@@ -254,11 +262,14 @@ public class CallbackServlet extends HttpServlet {
     try {
       userInfoResponse = UserInfoResponse.parse(send(userInfoRequest));
     } catch (ParseException | IOException e) {
+      revokeTokens(successResponse);
       sendError(
           resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error in User Info request", e);
       return;
     }
     if (!userInfoResponse.indicatesSuccess()) {
+      // Error might be because the token is wrong for some reason, but better be safe than sorry
+      revokeTokens(successResponse);
       sendError(
           resp,
           HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
@@ -274,6 +285,7 @@ public class CallbackServlet extends HttpServlet {
         userInfo =
             new UserInfo(userInfoResponse.toSuccessResponse().getUserInfoJWT().getJWTClaimsSet());
       } catch (java.text.ParseException e) {
+        revokeTokens(successResponse);
         sendError(
             resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error parsing ID Token claims", e);
         return;
@@ -295,6 +307,21 @@ public class CallbackServlet extends HttpServlet {
     } else {
       return request.toHTTPRequest().send();
     }
+  }
+
+  private void maybeRevokeTokens(TokenResponse response) {
+    if (response.indicatesSuccess()) {
+      revokeTokens((OIDCTokenResponse) response.toSuccessResponse());
+    }
+  }
+
+  private void revokeTokens(OIDCTokenResponse response) {
+    new RevokingOAuthTokensHandler(configuration, httpRequestSender) {
+      @Override
+      protected void handleError(Exception e) {
+        log("Error revoking the access token after an error", e);
+      }
+    }.revokeAsync(response.getTokens().getAccessToken());
   }
 
   @ForOverride

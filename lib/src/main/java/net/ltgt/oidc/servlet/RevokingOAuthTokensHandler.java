@@ -71,10 +71,14 @@ public class RevokingOAuthTokensHandler implements OAuthTokensHandler {
 
   @Override
   public void tokensAcquired(AccessTokenResponse tokenResponse, HttpSession session) {
+    revokeAsync(tokenResponse.getTokens().getAccessToken());
+  }
+
+  void revokeAsync(Token token) {
     executor.execute(
         () -> {
           try {
-            revoke(tokenResponse.getTokens().getAccessToken());
+            revoke(token);
           } catch (IOException e) {
             handleError(e);
           }
