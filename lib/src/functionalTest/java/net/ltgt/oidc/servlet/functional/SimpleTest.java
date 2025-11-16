@@ -6,7 +6,9 @@ import static net.ltgt.oidc.servlet.fixtures.Helpers.login;
 import static org.openqa.selenium.support.ui.ExpectedConditions.stalenessOf;
 
 import com.nimbusds.oauth2.sdk.AccessTokenResponse;
+import com.nimbusds.oauth2.sdk.ResponseMode;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
+import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.UserInfoRequest;
 import com.nimbusds.openid.connect.sdk.UserInfoResponse;
 import jakarta.servlet.http.HttpSession;
@@ -16,46 +18,68 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import net.ltgt.oidc.servlet.AuthenticationRedirector;
 import net.ltgt.oidc.servlet.Configuration;
 import net.ltgt.oidc.servlet.IsAuthenticatedFilter;
 import net.ltgt.oidc.servlet.LogoutServlet;
 import net.ltgt.oidc.servlet.OAuthTokensHandler;
 import net.ltgt.oidc.servlet.RevokingOAuthTokensHandler;
 import net.ltgt.oidc.servlet.fixtures.WebDriverExtension;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+@ParameterizedClass
+@NullSource
+@ValueSource(strings = {"form_post"})
 @ExtendWith(WebDriverExtension.class)
 public class SimpleTest {
   ExecutorService revocationExecutor = Executors.newCachedThreadPool();
   List<AccessToken> accessTokens = new CopyOnWriteArrayList<>();
 
-  @RegisterExtension
-  public WebServerExtension server =
-      new WebServerExtension(
-          "simple",
-          contextHandler -> {
-            contextHandler.addFilter(IsAuthenticatedFilter.class, "/*", null);
-            contextHandler.addServlet(LogoutServlet.class, "/logout");
+  @RegisterExtension public WebServerExtension server;
 
-            contextHandler.setAttribute(
-                OAuthTokensHandler.CONTEXT_ATTRIBUTE_NAME,
-                new RevokingOAuthTokensHandler(
-                    (Configuration)
-                        contextHandler.getAttribute(Configuration.CONTEXT_ATTRIBUTE_NAME),
-                    revocationExecutor) {
-                  @Override
-                  public void tokensAcquired(
-                      AccessTokenResponse tokenResponse, HttpSession session) {
-                    accessTokens.add(tokenResponse.getTokens().getAccessToken());
-                    super.tokensAcquired(tokenResponse, session);
-                  }
-                });
-          });
+  SimpleTest(@Nullable ResponseMode responseMode) {
+    server =
+        new WebServerExtension(
+            "simple",
+            responseMode == null
+                ? AuthenticationRedirector::new
+                : (configuration, callbackPath) ->
+                    new AuthenticationRedirector(configuration, callbackPath) {
+                      @Override
+                      protected void configureAuthenticationRequest(
+                          AuthenticationRequest.Builder authenticationRequestBuilder) {
+                        // Note: form_post only works because the tests run same-site
+                        authenticationRequestBuilder.responseMode(responseMode);
+                      }
+                    },
+            contextHandler -> {
+              contextHandler.addFilter(IsAuthenticatedFilter.class, "/*", null);
+              contextHandler.addServlet(LogoutServlet.class, "/logout");
+
+              contextHandler.setAttribute(
+                  OAuthTokensHandler.CONTEXT_ATTRIBUTE_NAME,
+                  new RevokingOAuthTokensHandler(
+                      (Configuration)
+                          contextHandler.getAttribute(Configuration.CONTEXT_ATTRIBUTE_NAME),
+                      revocationExecutor) {
+                    @Override
+                    public void tokensAcquired(
+                        AccessTokenResponse tokenResponse, HttpSession session) {
+                      accessTokens.add(tokenResponse.getTokens().getAccessToken());
+                      super.tokensAcquired(tokenResponse, session);
+                    }
+                  });
+            });
+  }
 
   @Test
   public void loginThenLogout(WebDriver driver) throws Exception {
