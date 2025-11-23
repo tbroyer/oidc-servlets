@@ -34,7 +34,7 @@ docker compose up -d
 ```
 
 This will start Keycloak, then configure a realm, a client, and a couple users, using [keycloak-config-cli](https://github.com/adorsys/keycloak-config-cli).
-The server listens on http://localhost:8080/, the Keycloak administrator is `kcadmin`/`kcadmin`, and test users in the `example` realm are `admin`/`admin` and `user`/`user`.
+The server listens on http://auth.localhost:8080/, the Keycloak administrator is `kcadmin`/`kcadmin`, and test users in the `example` realm are `admin`/`admin` and `user`/`user`.
 
 Then start the example application (preconfigured to integrate with that Keycloak server and configuration):
 
@@ -43,7 +43,7 @@ Then start the example application (preconfigured to integrate with that Keycloa
 ```
 
 This will compile the code then execute it. Hit <kbd>Ctrl</kbd>+<kbd>C</kbd> to terminate the process.
-The server listens on http://localhost:8000/.
+The server listens on http://app.localhost:8000/.
 
 ## Usage
 

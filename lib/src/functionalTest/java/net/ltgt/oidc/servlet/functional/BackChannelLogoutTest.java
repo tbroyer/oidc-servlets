@@ -46,7 +46,8 @@ public class BackChannelLogoutTest {
                 BackchannelLogoutServlet.class,
                 WebServerExtension.BACK_CHANNEL_LOGOUT_CALLBACK_PATH);
 
-            contextHandler.addFilter(IsAuthenticatedFilter.class, "/*", null);
+            // Only match "/", and specifically not "/*" so we can load another page anonymously
+            contextHandler.addFilter(IsAuthenticatedFilter.class, "/", null);
           });
 
   private void logoutFromIdPInOtherTab(WebDriver driver) {
@@ -94,9 +95,12 @@ public class BackChannelLogoutTest {
         .isEqualTo(server.getURI("/"));
     assertThat(driver.getTitle()).isEqualTo("Test page");
 
-    var oldCookie = driver.manage().getCookieNamed(SessionConfig.__DefaultSessionCookie);
-    assertThat(oldCookie).isNotNull();
-    driver.manage().deleteCookieNamed(requireNonNull(oldCookie).getName());
+    var oldCookies = driver.manage().getCookies();
+    assertThat(oldCookies).isNotEmpty();
+    var oldSessionCookie = driver.manage().getCookieNamed(SessionConfig.__DefaultSessionCookie);
+    assertThat(oldSessionCookie).isNotNull();
+    // User clears cookies for the site
+    driver.manage().deleteAllCookies();
 
     driver.navigate().refresh();
 
@@ -105,9 +109,12 @@ public class BackChannelLogoutTest {
         .isEqualTo(server.getURI("/"));
     assertThat(driver.getTitle()).isEqualTo("Test page");
 
-    var newCookie = driver.manage().getCookieNamed(oldCookie.getName());
-    assertThat(newCookie).isNotNull();
-    assertThat(requireNonNull(newCookie).getValue()).isNotEqualTo(oldCookie.getName());
+    var newSessionCookie =
+        driver.manage().getCookieNamed(requireNonNull(oldSessionCookie).getName());
+    assertThat(newSessionCookie).isNotNull();
+    assertWithMessage("Should create a new session")
+        .that(requireNonNull(newSessionCookie).getValue())
+        .isNotEqualTo(oldSessionCookie.getName());
 
     logoutFromIdPInOtherTab(driver);
 
@@ -117,7 +124,17 @@ public class BackChannelLogoutTest {
         .withMessage("Should have been logged out, and redirect to IdP")
         .until(urlMatches("^\\Q" + server.getIssuer()));
 
-    driver.manage().addCookie(oldCookie);
+    // Check that the "forgotten" session (after clearing cookies) has been logged out
+    // For that, we reinstate the "forgotten" cookies
+
+    // Need to go to the app to be able to set the cookies back, use a non-existent page
+    driver.get(server.getURI("/non-existent"));
+    assertWithMessage("Does not redirect to IdP")
+        .that(driver.getCurrentUrl())
+        .isEqualTo(server.getURI("/non-existent"));
+    driver.manage().deleteAllCookies();
+    oldCookies.forEach(driver.manage()::addCookie);
+
     driver.get(server.getURI("/"));
 
     new WebDriverWait(driver, Duration.ofSeconds(5))

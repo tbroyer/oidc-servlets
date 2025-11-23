@@ -32,7 +32,7 @@ testing {
                     mustRunAfter("${projects.oidcServlets.path}:functionalTest")
 
                     systemProperty("test.port", 8000)
-                    systemProperty("test.issuer", "http://localhost:8080/realms/example")
+                    systemProperty("test.issuer", "http://auth.localhost:8080/realms/example")
                     systemProperty("test.clientId", "app")
                     systemProperty("test.clientSecret", "example")
 

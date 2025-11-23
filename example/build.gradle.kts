@@ -16,7 +16,7 @@ tasks {
     register<JavaExec>("run") {
         classpath(sourceSets.main.map { it.runtimeClasspath })
         mainClass.set("net.ltgt.oidc.servlet.example.jetty.Main")
-        systemProperty("example.issuer", "http://localhost:8080/realms/example")
+        systemProperty("example.issuer", "http://auth.localhost:8080/realms/example")
         systemProperty("example.clientId", "app")
         systemProperty("example.clientSecret", "example")
         systemProperty(

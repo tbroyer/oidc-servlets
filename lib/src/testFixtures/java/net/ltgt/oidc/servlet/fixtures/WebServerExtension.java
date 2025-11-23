@@ -50,7 +50,7 @@ public class WebServerExtension implements BeforeEachCallback, AfterEachCallback
   }
 
   public String getURI(String path) {
-    return "http://localhost:" + port + path;
+    return "http://app.localhost:" + port + path;
   }
 
   public WebServerExtension(

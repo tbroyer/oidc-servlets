@@ -57,7 +57,9 @@ public class SimpleTest {
                       @Override
                       protected void configureAuthenticationRequest(
                           AuthenticationRequest.Builder authenticationRequestBuilder) {
-                        // Note: form_post only works because the tests run same-site
+                        // Note: form_post only works because we use Chrome
+                        // https://www.chromium.org/updates/same-site/faq/#q-what-is-the-lax-post-mitigation
+                        // This can break anytime as Chrome eventually removes Lax+POST.
                         authenticationRequestBuilder.responseMode(responseMode);
                       }
                     },

@@ -23,7 +23,7 @@ services:
       - "KEYCLOAK_AVAILABILITYCHECK_ENABLED=true"
       - "IMPORT_FILES_LOCATIONS=/config/*"
       - "IMPORT_VARSUBSTITUTION_ENABLED=true"
-      - "APP_BASE_URL=http://localhost:8000"
+      - "APP_BASE_URL=http://app.localhost:8000"
       - "APP_BACKCHANNEL_BASE_URL=http://host.docker.internal:8000"
       - "APP_CLIENT_SECRET=example"
     volumes:
