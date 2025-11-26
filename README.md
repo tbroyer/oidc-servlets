@@ -47,7 +47,8 @@ The server listens on http://app.localhost:8000/.
 
 ## Usage
 
-Add a dependency on [`net.ltgt.oidc:oidc-servlets`](https://central.sonatype.com/artifact/net.ltgt.oidc/oidc-servlets).
+Add a dependency on [`net.ltgt.oidc:oidc-servlets`](https://central.sonatype.com/artifact/net.ltgt.oidc/oidc-servlets);
+also add a dependency on [`com.nimbusds:oauth2-oidc-sdk`](https://central.sonatype.com/artifact/com.nimbusds/oauth2-oidc-sdk) so you can keep it up-to-date independently of OIDC-Servlets.
 
 Create `Configuration` and `AuthenticatorRedirector` objects and add them as `ServletContext` attributes (the attribute names are in the `CONTEXT_ATTRIBUTE_NAME` static constants of each class):
 
