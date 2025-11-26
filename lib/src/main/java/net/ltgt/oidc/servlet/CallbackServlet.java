@@ -16,6 +16,7 @@ import com.nimbusds.oauth2.sdk.TokenResponse;
 import com.nimbusds.oauth2.sdk.http.HTTPRequestSender;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.http.JakartaServletUtils;
+import com.nimbusds.oauth2.sdk.util.URLUtils;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponseParser;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
@@ -33,6 +34,8 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -71,6 +74,8 @@ import org.jspecify.annotations.Nullable;
  * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html">OpenID Connect Core 1.0</a>
  */
 public class CallbackServlet extends HttpServlet {
+  public static final String ERROR_NOT_A_NAVIGATION = "not_a_navigation";
+  public static final String ERROR_PARSING_PARAMETERS = "error_parsing_parameters";
 
   private Configuration configuration;
   private UserPrincipalFactory userPrincipalFactory;
@@ -166,13 +171,14 @@ public class CallbackServlet extends HttpServlet {
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
     if (!Utils.isNavigation(req)) {
-      sendError(resp, HttpServletResponse.SC_BAD_REQUEST, "Not a navigation request", null);
+      sendRedirectToError(req, resp, ERROR_NOT_A_NAVIGATION, "Not a navigation request", null);
+      return;
     }
     AuthenticationResponse response;
     try {
       response = AuthenticationResponseParser.parse(JakartaServletUtils.createHTTPRequest(req));
     } catch (ParseException e) {
-      sendError(resp, HttpServletResponse.SC_BAD_REQUEST, "Error parsing parameters", e);
+      sendRedirectToError(req, resp, ERROR_PARSING_PARAMETERS, "Error parsing parameters", e);
       return;
     }
     if (!response.indicatesSuccess()) {
@@ -332,5 +338,24 @@ public class CallbackServlet extends HttpServlet {
       log(message, cause);
     }
     resp.sendError(statusCode, message);
+  }
+
+  @ForOverride
+  protected void sendRedirectToError(
+      HttpServletRequest req,
+      HttpServletResponse resp,
+      String error,
+      String message,
+      @Nullable Throwable cause)
+      throws IOException, ServletException {
+    if (cause != null) {
+      log(message, cause);
+    }
+    var params =
+        URLUtils.serializeParameters(
+            Map.of("error", List.of(error), "error_description", List.of(message)));
+    // Must include a #hash to replace any response_mode=fragment response that could leak an
+    // authorization code through XSS
+    Utils.sendRedirect(resp, req.getRequestURI() + "?" + params + "#" + params);
   }
 }
