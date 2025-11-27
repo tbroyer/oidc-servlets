@@ -25,7 +25,7 @@ services:
       - "IMPORT_VARSUBSTITUTION_ENABLED=true"
       - "APP_BASE_URL=http://app.localhost:8000"
       - "APP_BACKCHANNEL_BASE_URL=http://host.docker.internal:8000"
-      - "APP_CLIENT_SECRET=example"
+      - "APP_CLIENT_SECRET=this_secret_must_be_32_byte_long"
     volumes:
       - "./keycloak/config/:/config/:ro"
 

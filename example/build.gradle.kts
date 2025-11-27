@@ -18,7 +18,7 @@ tasks {
         mainClass.set("net.ltgt.oidc.servlet.example.jetty.Main")
         systemProperty("example.issuer", "http://auth.localhost:8080/realms/example")
         systemProperty("example.clientId", "app")
-        systemProperty("example.clientSecret", "example")
+        systemProperty("example.clientSecret", "this_secret_must_be_32_byte_long")
         systemProperty(
             "example.sessionStoreDir",
             layout.buildDirectory

@@ -44,7 +44,7 @@ testing {
                     systemProperty("test.port", 8000)
                     systemProperty("test.issuer", "http://auth.localhost:8080/realms/example")
                     systemProperty("test.clientId", "app")
-                    systemProperty("test.clientSecret", "example")
+                    systemProperty("test.clientSecret", "this_secret_must_be_32_byte_long")
 
                     retry {
                         maxRetries = 2

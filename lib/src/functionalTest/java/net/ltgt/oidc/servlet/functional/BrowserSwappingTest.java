@@ -8,7 +8,6 @@ import static net.ltgt.oidc.servlet.fixtures.WebServerExtension.CALLBACK_PATH;
 import static org.openqa.selenium.support.ui.ExpectedConditions.urlMatches;
 
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
-import jakarta.servlet.http.HttpSession;
 import java.net.URI;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -18,7 +17,6 @@ import net.ltgt.oidc.servlet.AuthenticationRedirector;
 import net.ltgt.oidc.servlet.CallbackServlet;
 import net.ltgt.oidc.servlet.IsAuthenticatedFilter;
 import net.ltgt.oidc.servlet.fixtures.WebDriverExtension;
-import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,22 +53,11 @@ public class BrowserSwappingTest {
             (configuration, callbackPath) ->
                 new AuthenticationRedirector(configuration, callbackPath) {
                   @Override
-                  public void redirectToAuthenticationEndpoint(
-                      HttpSession session,
-                      String returnTo,
-                      @Nullable Consumer<AuthenticationRequest.Builder>
-                          configureAuthenticationRequest,
-                      URI baseUri,
-                      Consumer<URI> sendRedirect) {
-                    super.redirectToAuthenticationEndpoint(
-                        session,
-                        returnTo,
-                        configureAuthenticationRequest,
-                        baseUri,
-                        uri -> {
-                          authenticationEndpointRedirects.add(uri.toString());
-                          sendRedirect.accept(uri);
-                        });
+                  protected void sendRedirect(
+                      AuthenticationRequest authenticationRequest, Consumer<URI> sendRedirect) {
+                    var uri = authenticationRequest.toURI();
+                    authenticationEndpointRedirects.add(uri.toString());
+                    sendRedirect.accept(uri);
                   }
                 },
             contextHandler -> {
@@ -141,22 +128,11 @@ public class BrowserSwappingTest {
             (configuration, callbackPath) ->
                 new AuthenticationRedirector(configuration, callbackPath) {
                   @Override
-                  public void redirectToAuthenticationEndpoint(
-                      HttpSession session,
-                      String returnTo,
-                      @Nullable Consumer<AuthenticationRequest.Builder>
-                          configureAuthenticationRequest,
-                      URI baseUri,
-                      Consumer<URI> sendRedirect) {
-                    super.redirectToAuthenticationEndpoint(
-                        session,
-                        returnTo,
-                        configureAuthenticationRequest,
-                        baseUri,
-                        uri -> {
-                          authenticationEndpointRedirects.add(uri.toString());
-                          sendRedirect.accept(uri);
-                        });
+                  protected void sendRedirect(
+                      AuthenticationRequest authenticationRequest, Consumer<URI> sendRedirect) {
+                    var uri = authenticationRequest.toURI();
+                    authenticationEndpointRedirects.add(uri.toString());
+                    sendRedirect.accept(uri);
                   }
                 },
             contextHandler -> {

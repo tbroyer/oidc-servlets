@@ -124,7 +124,7 @@ public class AuthenticationRedirector {
         // From RFC: If the client is capable of using S256, it MUST use S256.
         .codeChallenge(codeVerifier, CodeChallengeMethod.S256)
         .dPoPJWKThumbprintConfirmation(dpopJkt);
-    sendRedirect.accept(authenticationRequestBuilder.build().toURI());
+    sendRedirect(authenticationRequestBuilder.build(), sendRedirect);
   }
 
   /**
@@ -133,11 +133,24 @@ public class AuthenticationRedirector {
    * further.
    *
    * <p>The {@link Consumer configurator} passed to {@code redirectToAuthenticationEndpoint}, if
-   * any, will be called before this method. Then {@code redirectToAuthenticationEndpoint} will
-   * finalize configuration after this method (possibly overwriting some properties) before
+   * any, will have been called before this method. Then {@code redirectToAuthenticationEndpoint}
+   * will finalize configuration after this method (possibly overwriting some properties) before
    * redirecting.
    */
   @ForOverride
   protected void configureAuthenticationRequest(
       AuthenticationRequest.Builder authenticationRequestBuilder) {}
+
+  /**
+   * Called by {@link #redirectToAuthenticationEndpoint(HttpServletRequest, HttpServletResponse,
+   * String, Consumer) redirectToAuthenticationEndpoint} to actually send the redirect.
+   *
+   * @implSpec The default implementation.simply calls {@code
+   *     sendRedirect.accept(authenticationRequest.toURI())}.
+   */
+  @ForOverride
+  protected void sendRedirect(
+      AuthenticationRequest authenticationRequest, Consumer<URI> sendRedirect) {
+    sendRedirect.accept(authenticationRequest.toURI());
+  }
 }
