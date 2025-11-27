@@ -7,8 +7,8 @@ public interface UserPrincipal extends Principal {
   /**
    * Returns the user's name.
    *
-   * <p>The default implementation returns the <i>subject</i> from the user information in {@link
-   * #getSessionInfo()}.
+   * @implSpec The default implementation returns the <i>subject</i> from the user information in
+   *     {@link #getSessionInfo()}.
    */
   @Override
   default String getName() {

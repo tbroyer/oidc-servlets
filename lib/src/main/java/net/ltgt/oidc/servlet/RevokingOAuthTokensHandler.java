@@ -108,8 +108,8 @@ public class RevokingOAuthTokensHandler implements OAuthTokensHandler {
   /**
    * Handles an exception happening in the asynchronous revocation task.
    *
-   * <p>The default implementation re-throws the exception, possibly wrapped in an {@link
-   * UncheckedIOException} or a {@link RuntimeException}.
+   * @implSpec The default implementation re-throws the exception, possibly wrapped in an {@link
+   *     UncheckedIOException} or a {@link RuntimeException}.
    */
   @ForOverride
   protected void handleError(Exception e) {
@@ -123,7 +123,7 @@ public class RevokingOAuthTokensHandler implements OAuthTokensHandler {
   /**
    * Handles an unsuccessful response to the token revocation request.
    *
-   * <p>The default implementation does nothing.
+   * @implSpec The default implementation does nothing.
    */
   @ForOverride
   protected void handleError(HTTPResponse response) {}

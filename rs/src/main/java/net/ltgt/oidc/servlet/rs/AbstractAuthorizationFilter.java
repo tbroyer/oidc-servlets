@@ -58,10 +58,9 @@ public abstract class AbstractAuthorizationFilter implements ContainerRequestFil
    * This method is called whenever the user is not authorized and the request is a {@linkplain
    * Utils#isSafeMethod safe} {@linkplain Utils#isNavigation navigation} request.
    *
-   * <p>The default implementation simply calls the globally configured {@link
-   * AuthenticationRedirector}, and allows {@linkplain #configureAuthenticationRequest configuring
-   * the authentication request}.
-   *
+   * @implSpec The default implementation simply calls the globally configured {@link
+   *     AuthenticationRedirector}, and allows {@linkplain #configureAuthenticationRequest
+   *     configuring the authentication request}.
    * @see #configureAuthenticationRequest
    * @see #sendUnauthorized
    */
@@ -79,8 +78,8 @@ public abstract class AbstractAuthorizationFilter implements ContainerRequestFil
   /**
    * Returns the configured authentication redirector.
    *
-   * <p>The default implementation gets it from the {@linkplain #servletRequest request}'s
-   * {@linkplain HttpServletRequest#getServletContext() servlet context}.
+   * @implSpec The default implementation gets it from the {@linkplain #servletRequest request}'s
+   *     {@linkplain HttpServletRequest#getServletContext() servlet context}.
    */
   @ForOverride
   protected AuthenticationRedirector getAuthenticationRedirector() {
@@ -122,11 +121,10 @@ public abstract class AbstractAuthorizationFilter implements ContainerRequestFil
    * This method is called whenever the user is not authorized and the request is <b>not</b> a
    * {@linkplain Utils#isSafeMethod safe} {@linkplain Utils#isNavigation navigation} request.
    *
-   * <p>The default implementation simply throws a {@link NotAuthorizedException} without a {@code
-   * WWW-Authenticate} response header. This is not strictly HTTP-compliant as it's missing the
-   * {@code WWW-Authenticate} response header, but is a good way to signal the error to JavaScript
-   * clients making an AJAX request.
-   *
+   * @implSpec The default implementation simply throws a {@link NotAuthorizedException} without a
+   *     {@code WWW-Authenticate} response header. This is not strictly HTTP-compliant as it's
+   *     missing the {@code WWW-Authenticate} response header, but is a good way to signal the error
+   *     to JavaScript clients making an AJAX request.
    * @see #sendUnauthorized
    * @see #redirectToAuthenticationEndpoint
    */
@@ -139,7 +137,7 @@ public abstract class AbstractAuthorizationFilter implements ContainerRequestFil
   /**
    * This method is called whenever the user is authenticated but not authorized.
    *
-   * <p>The default implementation simply throws a {@link ForbiddenException}.
+   * @implSpec The default implementation simply throws a {@link ForbiddenException}.
    */
   @ForOverride
   protected void sendForbidden(
