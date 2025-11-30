@@ -1,8 +1,57 @@
 package net.ltgt.oidc.servlet.rs;
 
+import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Response;
+import java.util.function.Consumer;
+import net.ltgt.oidc.servlet.AuthenticationRedirector;
+import net.ltgt.oidc.servlet.CallbackServlet;
+import org.jspecify.annotations.Nullable;
 
-class Utils {
+public class Utils {
+
+  private Utils() {
+    // non-instantiable
+  }
+
+  /**
+   * Redirects to the OpenID Provider, returning to the given page when coming back.
+   *
+   * <p>This is equivalent to {@code redirectToAuthenticationEndpoint(req, res, returnTo, null)}.
+   */
+  public static void redirectToAuthenticationEndpoint(
+      AuthenticationRedirector authenticationRedirector,
+      ContainerRequestContext containerRequestContext,
+      HttpServletRequest req,
+      String returnTo) {
+    redirectToAuthenticationEndpoint(
+        authenticationRedirector, containerRequestContext, req, returnTo, null);
+  }
+
+  /**
+   * Redirects to the OpenID Provider, returning to the given page when coming back, and possibly
+   * configuring the authentication request further.
+   *
+   * <p>The target page should be given as an absolute path (possibly with a query string), though a
+   * full URL would be accepted as long as it's the same <a
+   * href="https://datatracker.ietf.org/doc/html/rfc6454">origin</a>. It will be saved in the
+   * session to be redirected to from the {@link CallbackServlet}.
+   */
+  public static void redirectToAuthenticationEndpoint(
+      AuthenticationRedirector authenticationRedirector,
+      ContainerRequestContext containerRequestContext,
+      HttpServletRequest req,
+      String returnTo,
+      @Nullable Consumer<AuthenticationRequest.Builder> configureAuthenticationRequest) {
+    authenticationRedirector.redirectToAuthenticationEndpoint(
+        req.getSession(),
+        returnTo,
+        configureAuthenticationRequest,
+        containerRequestContext.getUriInfo().getRequestUri(),
+        uri -> containerRequestContext.abortWith(Response.seeOther(uri).build()));
+  }
+
   /** Returns whether the request is a navigation request. */
   static boolean isNavigation(ContainerRequestContext containerRequestContext) {
     var fetchMode = containerRequestContext.getHeaderString("Sec-Fetch-Mode");

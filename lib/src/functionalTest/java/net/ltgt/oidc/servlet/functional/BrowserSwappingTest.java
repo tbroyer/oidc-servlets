@@ -55,7 +55,7 @@ public class BrowserSwappingTest {
             (configuration, callbackPath) ->
                 new AuthenticationRedirector(configuration, callbackPath) {
                   @Override
-                  protected void redirectToAuthenticationEndpoint(
+                  public void redirectToAuthenticationEndpoint(
                       HttpSession session,
                       String returnTo,
                       @Nullable Consumer<AuthenticationRequest.Builder>
@@ -141,7 +141,7 @@ public class BrowserSwappingTest {
             (configuration, callbackPath) ->
                 new AuthenticationRedirector(configuration, callbackPath) {
                   @Override
-                  protected void redirectToAuthenticationEndpoint(
+                  public void redirectToAuthenticationEndpoint(
                       HttpSession session,
                       String returnTo,
                       @Nullable Consumer<AuthenticationRequest.Builder>

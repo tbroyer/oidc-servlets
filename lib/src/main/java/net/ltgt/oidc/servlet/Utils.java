@@ -50,10 +50,10 @@ public class Utils {
   }
 
   /**
-   * Same as {@link HttpServletResponse#sendRedirect(String)} but uses {@link
+   * Similar to {@link HttpServletResponse#sendRedirect(String)} but uses {@link
    * HttpServletResponse#SC_SEE_OTHER} rather than {@link HttpServletResponse#SC_FOUND}.
    */
-  static void sendRedirect(HttpServletResponse res, String location) {
+  public static void sendRedirect(HttpServletResponse res, String location) {
     res.resetBuffer();
     res.setHeader("Location", location);
     res.setStatus(HttpServletResponse.SC_SEE_OTHER);

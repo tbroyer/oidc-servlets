@@ -13,6 +13,7 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 import java.io.IOException;
+import net.ltgt.oidc.servlet.AuthenticationRedirector;
 
 @Priority(Priorities.AUTHORIZATION)
 public abstract class AbstractAuthorizationFilter implements ContainerRequestFilter {
@@ -68,7 +69,8 @@ public abstract class AbstractAuthorizationFilter implements ContainerRequestFil
   protected void doRedirectToAuthenticationEndpoint(
       ContainerRequestContext containerRequestContext) {
     var authenticationRedirector = getAuthenticationRedirector();
-    authenticationRedirector.redirectToAuthenticationEndpoint(
+    Utils.redirectToAuthenticationEndpoint(
+        authenticationRedirector,
         containerRequestContext,
         servletRequest,
         containerRequestContext.getUriInfo().getRequestUri().toASCIIString(),

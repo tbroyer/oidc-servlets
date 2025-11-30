@@ -56,10 +56,9 @@ public class AuthenticationRedirector {
    * Redirects to the OpenID Provider, returning to the given page when coming back, and possibly
    * configuring the authentication request further.
    *
-   * <p>The target page should be given as an absolute path (possibly with a query string), though a
-   * full URL would be accepted as long as it's the same <a
-   * href="https://datatracker.ietf.org/doc/html/rfc6454">origin</a>. It will be saved in the
-   * session to be redirected to from the {@link CallbackServlet}.
+   * <p>This is equivalent to {@code redirectToAuthenticationEndpoint(req.getSession(), returnTo,
+   * configureAuthenticationRequest, URI.create(req.getRequestURL().toString()), uri ->
+   * Utils.sendRedirect(res, uri.toASCIIString()))}.
    */
   public void redirectToAuthenticationEndpoint(
       HttpServletRequest req,
@@ -74,7 +73,21 @@ public class AuthenticationRedirector {
         uri -> Utils.sendRedirect(res, uri.toASCIIString()));
   }
 
-  protected void redirectToAuthenticationEndpoint(
+  /**
+   * Redirects to the OpenID Provider, returning to the given page when coming back, and possibly
+   * configuring the authentication request further.
+   *
+   * <p>The target page should be given as an absolute path (possibly with a query string), though a
+   * full URL would be accepted as long as it's the same <a
+   * href="https://datatracker.ietf.org/doc/html/rfc6454">origin</a>. It will be saved in the
+   * session to be redirected to from the {@link CallbackServlet}.
+   *
+   * <p>The base URI is used to resolve the {@code callbackPath} passed to the constructor, to build
+   * the authentication request's {@code redirect_uri}. The {@code sendRedirect} is the actual
+   * implementation of the redirect response, depending on the environment (specifically using
+   * JAX-RS in the OIDC-Servlets+RS library).
+   */
+  public void redirectToAuthenticationEndpoint(
       HttpSession session,
       String returnTo,
       @Nullable Consumer<AuthenticationRequest.Builder> configureAuthenticationRequest,
