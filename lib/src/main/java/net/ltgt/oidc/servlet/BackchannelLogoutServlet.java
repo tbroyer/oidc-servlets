@@ -73,7 +73,7 @@ public class BackchannelLogoutServlet extends HttpServlet {
       logoutTokenValidator =
           new LogoutTokenValidator(
               configuration.getProviderMetadata().getIssuer(),
-              configuration.getClientAuthentication().getClientID(),
+              configuration.getClientId(),
               false, // XXX: make configurable?
               new JWSVerificationKeySelector(
                   Set.copyOf(configuration.getProviderMetadata().getIDTokenJWSAlgs()),

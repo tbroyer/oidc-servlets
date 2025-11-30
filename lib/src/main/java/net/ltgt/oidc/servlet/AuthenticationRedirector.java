@@ -90,7 +90,7 @@ public class AuthenticationRedirector {
         new AuthenticationRequest.Builder(
             ResponseType.CODE,
             new Scope(OIDCScopeValue.OPENID, OIDCScopeValue.PROFILE, OIDCScopeValue.EMAIL),
-            configuration.getClientAuthentication().getClientID(),
+            configuration.getClientId(),
             baseUri.resolve(callbackPath));
     if (configureAuthenticationRequest != null) {
       configureAuthenticationRequest.accept(authenticationRequestBuilder);

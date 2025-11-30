@@ -89,7 +89,7 @@ public class RevokingOAuthTokensHandler implements OAuthTokensHandler {
     var request =
         new TokenRevocationRequest(
             configuration.getProviderMetadata().getRevocationEndpointURI(),
-            configuration.getClientAuthentication(),
+            configuration.getClientAuthenticationSupplier().getClientAuthentication(),
             token);
     var response = send(request);
     if (!response.indicatesSuccess()) {

@@ -149,7 +149,7 @@ public class CallbackServlet extends HttpServlet {
       idTokenValidator =
           new IDTokenValidator(
               configuration.getProviderMetadata().getIssuer(),
-              configuration.getClientAuthentication().getClientID(),
+              configuration.getClientId(),
               new JWSVerificationKeySelector(
                   Set.copyOf(configuration.getProviderMetadata().getIDTokenJWSAlgs()),
                   JWKSourceBuilder.create(
@@ -207,7 +207,7 @@ public class CallbackServlet extends HttpServlet {
     var tokenRequest =
         new TokenRequest.Builder(
                 configuration.getProviderMetadata().getTokenEndpointURI(),
-                configuration.getClientAuthentication(),
+                configuration.getClientAuthenticationSupplier().getClientAuthentication(),
                 new AuthorizationCodeGrant(
                     code,
                     URI.create(req.getRequestURL().toString()),
