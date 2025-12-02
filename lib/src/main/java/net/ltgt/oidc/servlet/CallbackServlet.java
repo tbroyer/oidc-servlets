@@ -5,7 +5,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.errorprone.annotations.ForOverride;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.jwk.source.JWKSourceBuilder;
+import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jose.proc.JWSVerificationKeySelector;
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
@@ -32,7 +32,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +53,10 @@ import org.jspecify.annotations.Nullable;
  * jakarta.servlet.ServletContext ServletContext} attribute under the name {@link
  * Utils#HTTP_REQUEST_SENDER_CONTEXT_ATTRIBUTE_NAME}, it'll be used to send requests to the OpenID
  * Provider.
+ *
+ * <p>If a {@link JWKSource} instance has been added as {@link jakarta.servlet.ServletContext
+ * ServletContext} attribute under the name {@link Utils#JWK_SOURCE_CONTEXT_ATTRIBUTE_NAME}, it'll
+ * be used to validate the ID Token signature.
  *
  * <p>Authentication state must have been put in the {@linkplain jakarta.servlet.http.HttpSession
  * session} by an {@link AuthenticationRedirector} (generally through the {@link LoginServlet} or an
@@ -81,35 +84,110 @@ public class CallbackServlet extends HttpServlet {
   private UserPrincipalFactory userPrincipalFactory;
   private @Nullable HTTPRequestSender httpRequestSender;
   private boolean httpRequestSenderExplicitlySet;
-  private IDTokenValidator idTokenValidator;
   private OAuthTokensHandler oauthTokensHandler;
+  private final @Nullable JWKSource<?> jwkSource;
+  private IDTokenValidator idTokenValidator;
 
-  public CallbackServlet() {}
-
-  /**
-   * Constructs a servlet with the given configuration and {@link UserPrincipal} factory, and no
-   * HTTP request sender.
-   *
-   * <p>When this constructor is used, the servlet context attributes won't be read.
-   *
-   * <p>This is equivalent to {@code new CallbackServlet(configuration, userPrincipalFactory,
-   * null)}.
-   */
-  public CallbackServlet(Configuration configuration, UserPrincipalFactory userPrincipalFactory) {
-    this(configuration, userPrincipalFactory, null);
+  public CallbackServlet() {
+    this.jwkSource = null;
   }
 
   /**
-   * Constructs a servlet with the given configuration and {@link UserPrincipal} factory.
+   * Constructs a servlet with the given configuration and {@link UserPrincipal} factory, no HTTP
+   * request sender, and a default OAuth tokens handler.
+   *
+   * <p>When this constructor is used, the servlet context attributes for the configuration, {@link
+   * UserPrincipal} factory, HTTP request sender, and OAuth tokens handler won't be read. The JWK
+   * source will however be read from the servlet context, and a default value based on the
+   * configuration's JWKSet URI possibly be provided to the servlet context.
+   *
+   * <p>This is equivalent to {@code new CallbackServlet(configuration, userPrincipalFactory, new
+   * RevokingOAuthTokensHandler(configuration))}.
+   */
+  public CallbackServlet(Configuration configuration, UserPrincipalFactory userPrincipalFactory) {
+    this(configuration, userPrincipalFactory, new RevokingOAuthTokensHandler(configuration));
+  }
+
+  /**
+   * Constructs a servlet with the given configuration, {@link UserPrincipal} factory, and OAuth
+   * tokens handler, and no HTTP request sender.
+   *
+   * <p>When this constructor is used, the servlet context attributes for the configuration, {@link
+   * UserPrincipal} factory, HTTP request sender, and OAuth tokens handler won't be read. The JWK
+   * source will however be read from the servlet context, and a default value based on the
+   * configuration's JWKSet URI possibly be provided to the servlet context.
+   *
+   * <p>This is equivalent to {@code new CallbackServlet(configuration, userPrincipalFactory,
+   * oauthTokensHandler, null)}.
+   */
+  public CallbackServlet(
+      Configuration configuration,
+      UserPrincipalFactory userPrincipalFactory,
+      OAuthTokensHandler oauthTokensHandler) {
+    this(configuration, userPrincipalFactory, oauthTokensHandler, null);
+  }
+
+  /**
+   * Constructs a servlet with the given configuration, {@link UserPrincipal} factory, and HTTP
+   * request sender, and a default OAuth tokens handler.
+   *
+   * <p>When this constructor is used, the servlet context attributes for the configuration, {@link
+   * UserPrincipal} factory, HTTP request sender, and OAuth tokens handler won't be read. The JWK
+   * source will however be read from the servlet context, and a default value based on the
+   * configuration's JWKSet URI possibly be provided to the servlet context.
+   *
+   * <p>This is equivalent to {@code new CallbackServlet(configuration, userPrincipalFactory, new
+   * RevokingOAuthTokensHandler(configuration), null)}.
+   */
+  public CallbackServlet(
+      Configuration configuration,
+      UserPrincipalFactory userPrincipalFactory,
+      @Nullable HTTPRequestSender httpRequestSender) {
+    this(
+        configuration,
+        userPrincipalFactory,
+        new RevokingOAuthTokensHandler(configuration),
+        httpRequestSender);
+  }
+
+  /**
+   * Constructs a servlet with the given configuration, {@link UserPrincipal} factory, HTTP request
+   * sender, and OAuth tokens handler.
+   *
+   * <p>When this constructor is used, the servlet context attributes for the configuration, {@link
+   * UserPrincipal} factory, HTTP request sender, and OAuth tokens handler won't be read. The JWK
+   * source will however be read from the servlet context, and a default value based on the
+   * configuration's JWKSet URI possibly be provided to the servlet context.
+   */
+  public CallbackServlet(
+      Configuration configuration,
+      UserPrincipalFactory userPrincipalFactory,
+      OAuthTokensHandler oauthTokensHandler,
+      @Nullable HTTPRequestSender httpRequestSender) {
+    this.configuration = requireNonNull(configuration);
+    this.userPrincipalFactory = requireNonNull(userPrincipalFactory);
+    this.jwkSource = null;
+    this.oauthTokensHandler = requireNonNull(oauthTokensHandler);
+    this.httpRequestSender = httpRequestSender;
+    this.httpRequestSenderExplicitlySet = true;
+  }
+
+  /**
+   * Constructs a servlet with the given configuration, {@link UserPrincipal} factory, HTTP request
+   * sender, JWK source, and OAuth tokens handler.
    *
    * <p>When this constructor is used, the servlet context attributes won't be read.
    */
   public CallbackServlet(
       Configuration configuration,
       UserPrincipalFactory userPrincipalFactory,
+      JWKSource<?> jwkSource,
+      OAuthTokensHandler oauthTokensHandler,
       @Nullable HTTPRequestSender httpRequestSender) {
     this.configuration = requireNonNull(configuration);
     this.userPrincipalFactory = requireNonNull(userPrincipalFactory);
+    this.jwkSource = requireNonNull(jwkSource);
+    this.oauthTokensHandler = requireNonNull(oauthTokensHandler);
     this.httpRequestSender = httpRequestSender;
     this.httpRequestSenderExplicitlySet = true;
   }
@@ -145,20 +223,19 @@ public class CallbackServlet extends HttpServlet {
     if (oauthTokensHandler == null) {
       oauthTokensHandler = new RevokingOAuthTokensHandler(configuration, httpRequestSender);
     }
-    try {
-      idTokenValidator =
-          new IDTokenValidator(
-              configuration.getProviderMetadata().getIssuer(),
-              configuration.getClientId(),
-              new JWSVerificationKeySelector(
-                  Set.copyOf(configuration.getProviderMetadata().getIDTokenJWSAlgs()),
-                  JWKSourceBuilder.create(
-                          configuration.getProviderMetadata().getJWKSetURI().toURL())
-                      .build()),
-              null);
-    } catch (MalformedURLException e) {
-      throw new ServletException(e);
+    JWKSource<?> jwkSource = this.jwkSource;
+    if (jwkSource == null) {
+      jwkSource =
+          Utils.getJWKSource(
+              getServletContext(), configuration.getProviderMetadata().getJWKSetURI());
     }
+    idTokenValidator =
+        new IDTokenValidator(
+            configuration.getProviderMetadata().getIssuer(),
+            configuration.getClientId(),
+            new JWSVerificationKeySelector(
+                Set.copyOf(configuration.getProviderMetadata().getIDTokenJWSAlgs()), jwkSource),
+            null);
   }
 
   @Override

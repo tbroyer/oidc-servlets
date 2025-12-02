@@ -4,7 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.jwk.source.JWKSourceBuilder;
+import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jose.proc.JWSVerificationKeySelector;
 import com.nimbusds.jwt.JWT;
@@ -16,7 +16,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.util.Set;
 import org.jspecify.annotations.Nullable;
@@ -32,25 +31,51 @@ import org.jspecify.annotations.Nullable;
  * LoggedOutSessionStore} instance must have been added as a {@link jakarta.servlet.ServletContext
  * ServletContext} attribute under the name {@link LoggedOutSessionStore#CONTEXT_ATTRIBUTE_NAME}.
  *
+ * <p>If a {@link JWKSource} instance has been added as {@link jakarta.servlet.ServletContext
+ * ServletContext} attribute under the name {@link Utils#JWK_SOURCE_CONTEXT_ATTRIBUTE_NAME}, it'll
+ * be used to validate the logout token signature.
+ *
  * @see <a href="https://openid.net/specs/openid-connect-backchannel-1_0.html">OpenID Connect
  *     Back-Channel Logout 1.0</a>
  */
 public class BackchannelLogoutServlet extends HttpServlet {
-  private @Nullable Configuration configuration;
+  private final @Nullable Configuration configuration;
   private LoggedOutSessionStore loggedOutSessionStore;
+  private final @Nullable JWKSource<?> jwkSource;
   private LogoutTokenValidator logoutTokenValidator;
 
-  public BackchannelLogoutServlet() {}
+  public BackchannelLogoutServlet() {
+    this.configuration = null;
+    this.jwkSource = null;
+  }
 
   /**
    * Constructs a servlet with the given configuration and logged-out session store.
    *
-   * <p>When this constructor is used, the servlet context attributes won't be read.
+   * <p>When this constructor is used, the servlet context attributes for the configuration and
+   * logged-out session store won't be read. The JWK source will however be read from the servlet
+   * context, and a default value based on the configuration's JWKSet URI possibly be provided to
+   * the servlet context.
    */
   public BackchannelLogoutServlet(
       Configuration configuration, LoggedOutSessionStore loggedOutSessionStore) {
     this.configuration = requireNonNull(configuration);
     this.loggedOutSessionStore = requireNonNull(loggedOutSessionStore);
+    this.jwkSource = null;
+  }
+
+  /**
+   * Constructs a servlet with the given configuration, logged-out session store, and JWK source.
+   *
+   * <p>When this constructor is used, the servlet context attributes won't be read.
+   */
+  public BackchannelLogoutServlet(
+      Configuration configuration,
+      LoggedOutSessionStore loggedOutSessionStore,
+      JWKSource<?> jwkSource) {
+    this.configuration = requireNonNull(configuration);
+    this.loggedOutSessionStore = requireNonNull(loggedOutSessionStore);
+    this.jwkSource = requireNonNull(jwkSource);
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
@@ -67,23 +92,23 @@ public class BackchannelLogoutServlet extends HttpServlet {
       configuration =
           (Configuration) getServletContext().getAttribute(Configuration.CONTEXT_ATTRIBUTE_NAME);
     }
+    JWKSource<?> jwkSource = this.jwkSource;
+    if (jwkSource == null) {
+      jwkSource =
+          Utils.getJWKSource(
+              getServletContext(), configuration.getProviderMetadata().getJWKSetURI());
+    }
     requireNonNull(loggedOutSessionStore, "loggedOutSessionStore");
     requireNonNull(configuration, "configuration");
-    try {
-      logoutTokenValidator =
-          new LogoutTokenValidator(
-              configuration.getProviderMetadata().getIssuer(),
-              configuration.getClientId(),
-              false, // XXX: make configurable?
-              new JWSVerificationKeySelector(
-                  Set.copyOf(configuration.getProviderMetadata().getIDTokenJWSAlgs()),
-                  JWKSourceBuilder.create(
-                          configuration.getProviderMetadata().getJWKSetURI().toURL())
-                      .build()),
-              null);
-    } catch (MalformedURLException e) {
-      throw new ServletException(e);
-    }
+    requireNonNull(jwkSource, "jwkSource");
+    logoutTokenValidator =
+        new LogoutTokenValidator(
+            configuration.getProviderMetadata().getIssuer(),
+            configuration.getClientId(),
+            false, // XXX: make configurable?
+            new JWSVerificationKeySelector(
+                Set.copyOf(configuration.getProviderMetadata().getIDTokenJWSAlgs()), jwkSource),
+            null);
   }
 
   @Override

@@ -1,10 +1,15 @@
 package net.ltgt.oidc.servlet;
 
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.jwk.source.JWKSourceBuilder;
 import com.nimbusds.oauth2.sdk.http.HTTPRequestSender;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.net.MalformedURLException;
 import java.net.URI;
 
 public class Utils {
@@ -16,6 +21,13 @@ public class Utils {
    */
   public static final String HTTP_REQUEST_SENDER_CONTEXT_ATTRIBUTE_NAME =
       Utils.class.getName() + "#" + HTTPRequestSender.class.getName();
+
+  /**
+   * The name of the {@linkplain jakarta.servlet.ServletContext#setAttribute servlet context
+   * attribute} to register a {@link JWKSource} to be used to validate JWT signatures.
+   */
+  public static final String JWK_SOURCE_CONTEXT_ATTRIBUTE_NAME =
+      Utils.class.getName() + "#" + JWKSource.class.getName();
 
   /**
    * The name of the form parameter to pass a page's path to return to after login or logout.
@@ -111,5 +123,27 @@ public class Utils {
       queryString = req.getQueryString();
     }
     return queryString == null ? requestUri : requestUri + "?" + queryString;
+  }
+
+  /**
+   * Returns the {@link #JWK_SOURCE_CONTEXT_ATTRIBUTE_NAME} servlet context attribute if it exists,
+   * and otherwise create a {@link JWKSource} from the JWKSet URI and stores it in the servlet
+   * context (so it can be shared between servlets).
+   */
+  static synchronized JWKSource<?> getJWKSource(ServletContext servletContext, URI jwkSetUri)
+      throws ServletException {
+    // XXX: don't synchronize on read and instead use double-checked locking?
+    // There shouldn't be much contention so this is probably not worth it.
+    JWKSource<?> jwkSource =
+        (JWKSource<?>) servletContext.getAttribute(Utils.JWK_SOURCE_CONTEXT_ATTRIBUTE_NAME);
+    if (jwkSource == null) {
+      try {
+        jwkSource = JWKSourceBuilder.create(jwkSetUri.toURL()).build();
+        servletContext.setAttribute(Utils.JWK_SOURCE_CONTEXT_ATTRIBUTE_NAME, jwkSource);
+      } catch (MalformedURLException e) {
+        throw new ServletException(e);
+      }
+    }
+    return jwkSource;
   }
 }
