@@ -9,12 +9,17 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jose.proc.JWSVerificationKeySelector;
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
+import com.nimbusds.oauth2.sdk.ErrorResponse;
+import com.nimbusds.oauth2.sdk.OAuth2Error;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.Request;
+import com.nimbusds.oauth2.sdk.Response;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.TokenResponse;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPRequestSender;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.token.AccessToken;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponseParser;
@@ -38,6 +43,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.jspecify.annotations.Nullable;
 
@@ -87,6 +93,9 @@ public class CallbackServlet extends HttpServlet {
   private boolean httpRequestSenderExplicitlySet;
   private OAuthTokensHandler oauthTokensHandler;
   private final @Nullable JWKSource<?> jwkSource;
+  private @Nullable DPoPSupport dpopSupport;
+  private boolean dpopSupportExplicitlySet;
+  private @Nullable DPoPNonceStore dpopNonceStore;
   private IDTokenValidator idTokenValidator;
 
   public CallbackServlet() {
@@ -95,7 +104,7 @@ public class CallbackServlet extends HttpServlet {
 
   /**
    * Constructs a servlet with the given configuration and {@link UserPrincipal} factory, no HTTP
-   * request sender, and a default OAuth tokens handler.
+   * request sender, no DPoP support, and a default OAuth tokens handler.
    *
    * <p>When this constructor is used, the servlet context attributes for the configuration, {@link
    * UserPrincipal} factory, HTTP request sender, and OAuth tokens handler won't be read. The JWK
@@ -111,7 +120,7 @@ public class CallbackServlet extends HttpServlet {
 
   /**
    * Constructs a servlet with the given configuration, {@link UserPrincipal} factory, and OAuth
-   * tokens handler, and no HTTP request sender.
+   * tokens handler, and no HTTP request sender or DPoP support.
    *
    * <p>When this constructor is used, the servlet context attributes for the configuration, {@link
    * UserPrincipal} factory, HTTP request sender, and OAuth tokens handler won't be read. The JWK
@@ -130,7 +139,7 @@ public class CallbackServlet extends HttpServlet {
 
   /**
    * Constructs a servlet with the given configuration, {@link UserPrincipal} factory, and HTTP
-   * request sender, and a default OAuth tokens handler.
+   * request sender, a default OAuth tokens handler, and no DPoP support.
    *
    * <p>When this constructor is used, the servlet context attributes for the configuration, {@link
    * UserPrincipal} factory, HTTP request sender, and OAuth tokens handler won't be read. The JWK
@@ -138,7 +147,7 @@ public class CallbackServlet extends HttpServlet {
    * configuration's JWKSet URI possibly be provided to the servlet context.
    *
    * <p>This is equivalent to {@code new CallbackServlet(configuration, userPrincipalFactory, new
-   * RevokingOAuthTokensHandler(configuration), null)}.
+   * RevokingOAuthTokensHandler(configuration), httpRequestSender)}.
    */
   public CallbackServlet(
       Configuration configuration,
@@ -152,8 +161,8 @@ public class CallbackServlet extends HttpServlet {
   }
 
   /**
-   * Constructs a servlet with the given configuration, {@link UserPrincipal} factory, HTTP request
-   * sender, and OAuth tokens handler.
+   * Constructs a servlet with the given configuration, {@link UserPrincipal} factory, OAuth tokens
+   * handler, and HTTP request sender, and no DPoP support.
    *
    * <p>When this constructor is used, the servlet context attributes for the configuration, {@link
    * UserPrincipal} factory, HTTP request sender, and OAuth tokens handler won't be read. The JWK
@@ -171,11 +180,115 @@ public class CallbackServlet extends HttpServlet {
     this.oauthTokensHandler = requireNonNull(oauthTokensHandler);
     this.httpRequestSender = httpRequestSender;
     this.httpRequestSenderExplicitlySet = true;
+    this.dpopSupport = null;
+    this.dpopSupportExplicitlySet = true;
+    this.dpopNonceStore = null;
+  }
+
+  /**
+   * Constructs a servlet with the given configuration {@link UserPrincipal} factory, and DPoP
+   * support with optional nonce store, no HTTP request sender, and a default OAuth tokens handler.
+   *
+   * <p>When this constructor is used, the servlet context attributes for the configuration, {@link
+   * UserPrincipal} factory, HTTP request sender, and OAuth tokens handler won't be read. The JWK
+   * source will however be read from the servlet context, and a default value based on the
+   * configuration's JWKSet URI possibly be provided to the servlet context.
+   *
+   * <p>This is equivalent to {@code new CallbackServlet(configuration, userPrincipalFactory, new
+   * RevokingOAuthTokensHandler(configuration), dpopSupport, dpopNonceStore)}.
+   */
+  public CallbackServlet(
+      Configuration configuration,
+      UserPrincipalFactory userPrincipalFactory,
+      DPoPSupport dpopSupport,
+      @Nullable DPoPNonceStore dpopNonceStore) {
+    this(
+        configuration,
+        userPrincipalFactory,
+        new RevokingOAuthTokensHandler(configuration),
+        dpopSupport,
+        dpopNonceStore);
+  }
+
+  /**
+   * Constructs a servlet with the given configuration, {@link UserPrincipal} factory, OAuth tokens
+   * handler, and DPoP support with optional nonce store, and no HTTP request sender.
+   *
+   * <p>When this constructor is used, the servlet context attributes for the configuration, {@link
+   * UserPrincipal} factory, HTTP request sender, and OAuth tokens handler won't be read. The JWK
+   * source will however be read from the servlet context, and a default value based on the
+   * configuration's JWKSet URI possibly be provided to the servlet context.
+   *
+   * <p>This is equivalent to {@code new CallbackServlet(configuration, userPrincipalFactory,
+   * oauthTokensHandler, null, dpopSupport, dpopNonceStore)}.
+   */
+  public CallbackServlet(
+      Configuration configuration,
+      UserPrincipalFactory userPrincipalFactory,
+      OAuthTokensHandler oauthTokensHandler,
+      DPoPSupport dpopSupport,
+      @Nullable DPoPNonceStore dpopNonceStore) {
+    this(
+        configuration, userPrincipalFactory, oauthTokensHandler, null, dpopSupport, dpopNonceStore);
   }
 
   /**
    * Constructs a servlet with the given configuration, {@link UserPrincipal} factory, HTTP request
-   * sender, JWK source, and OAuth tokens handler.
+   * sender, DPoP support with optional nonce store, and a default OAuth tokens handler.
+   *
+   * <p>When this constructor is used, the servlet context attributes for the configuration, {@link
+   * UserPrincipal} factory, HTTP request sender, and OAuth tokens handler won't be read. The JWK
+   * source will however be read from the servlet context, and a default value based on the
+   * configuration's JWKSet URI possibly be provided to the servlet context.
+   *
+   * <p>This is equivalent to {@code new CallbackServlet(configuration, userPrincipalFactory, new
+   * RevokingOAuthTokensHandler(configuration), httpRequestHandler, dpopSupport, dpopNonceStore)}.
+   */
+  public CallbackServlet(
+      Configuration configuration,
+      UserPrincipalFactory userPrincipalFactory,
+      @Nullable HTTPRequestSender httpRequestSender,
+      DPoPSupport dpopSupport,
+      @Nullable DPoPNonceStore dpopNonceStore) {
+    this(
+        configuration,
+        userPrincipalFactory,
+        new RevokingOAuthTokensHandler(configuration),
+        httpRequestSender,
+        dpopSupport,
+        dpopNonceStore);
+  }
+
+  /**
+   * Constructs a servlet with the given configuration, {@link UserPrincipal} factory, HTTP request
+   * sender, OAuth tokens handler, and DPoP support with optional nonce store.
+   *
+   * <p>When this constructor is used, the servlet context attributes for the configuration, {@link
+   * UserPrincipal} factory, HTTP request sender, and OAuth tokens handler won't be read. The JWK
+   * source will however be read from the servlet context, and a default value based on the
+   * configuration's JWKSet URI possibly be provided to the servlet context.
+   */
+  public CallbackServlet(
+      Configuration configuration,
+      UserPrincipalFactory userPrincipalFactory,
+      OAuthTokensHandler oauthTokensHandler,
+      @Nullable HTTPRequestSender httpRequestSender,
+      DPoPSupport dpopSupport,
+      @Nullable DPoPNonceStore dpopNonceStore) {
+    this.configuration = requireNonNull(configuration);
+    this.userPrincipalFactory = requireNonNull(userPrincipalFactory);
+    this.jwkSource = null;
+    this.oauthTokensHandler = requireNonNull(oauthTokensHandler);
+    this.httpRequestSender = httpRequestSender;
+    this.httpRequestSenderExplicitlySet = true;
+    this.dpopSupport = requireNonNull(dpopSupport);
+    this.dpopSupportExplicitlySet = true;
+    this.dpopNonceStore = dpopNonceStore;
+  }
+
+  /**
+   * Constructs a servlet with the given configuration, {@link UserPrincipal} factory, HTTP request
+   * sender, JWK source, and OAuth tokens handler, and no DPoP support.
    *
    * <p>When this constructor is used, the servlet context attributes won't be read.
    */
@@ -191,6 +304,34 @@ public class CallbackServlet extends HttpServlet {
     this.oauthTokensHandler = requireNonNull(oauthTokensHandler);
     this.httpRequestSender = httpRequestSender;
     this.httpRequestSenderExplicitlySet = true;
+    this.dpopSupport = null;
+    this.dpopSupportExplicitlySet = true;
+    this.dpopNonceStore = null;
+  }
+
+  /**
+   * Constructs a servlet with the given configuration, {@link UserPrincipal} factory, HTTP request
+   * sender, JWK source, OAuth tokens handler, and DPoP support with optional nonce store.
+   *
+   * <p>When this constructor is used, the servlet context attributes won't be read.
+   */
+  public CallbackServlet(
+      Configuration configuration,
+      UserPrincipalFactory userPrincipalFactory,
+      JWKSource<?> jwkSource,
+      OAuthTokensHandler oauthTokensHandler,
+      @Nullable HTTPRequestSender httpRequestSender,
+      DPoPSupport dpopSupport,
+      @Nullable DPoPNonceStore dpopNonceStore) {
+    this.configuration = requireNonNull(configuration);
+    this.userPrincipalFactory = requireNonNull(userPrincipalFactory);
+    this.jwkSource = requireNonNull(jwkSource);
+    this.oauthTokensHandler = requireNonNull(oauthTokensHandler);
+    this.httpRequestSender = httpRequestSender;
+    this.httpRequestSenderExplicitlySet = true;
+    this.dpopSupport = requireNonNull(dpopSupport);
+    this.dpopSupportExplicitlySet = true;
+    this.dpopNonceStore = dpopNonceStore;
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
@@ -223,6 +364,19 @@ public class CallbackServlet extends HttpServlet {
     }
     if (oauthTokensHandler == null) {
       oauthTokensHandler = new RevokingOAuthTokensHandler(configuration, httpRequestSender);
+    }
+    if (!dpopSupportExplicitlySet) {
+      assert dpopSupport == null && dpopNonceStore == null;
+      dpopSupport =
+          (DPoPSupport) getServletContext().getAttribute(DPoPSupport.CONTEXT_ATTRIBUTE_NAME);
+      dpopNonceStore =
+          (DPoPNonceStore) getServletContext().getAttribute(DPoPNonceStore.CONTEXT_ATTRIBUTE_NAME);
+      if (dpopNonceStore != null) {
+        requireNonNull(dpopSupport, "DPoP nonce store is useless without DPoP support");
+      }
+    }
+    if (dpopNonceStore == null && dpopSupport != null) {
+      dpopNonceStore = new PerUriDPoPNonceStore();
     }
     JWKSource<?> jwkSource = this.jwkSource;
     if (jwkSource == null) {
@@ -273,6 +427,7 @@ public class CallbackServlet extends HttpServlet {
           null);
       return;
     }
+    var session = req.getSession(false);
     var code = response.toSuccessResponse().getAuthorizationCode();
     if (code == null) {
       // Might be a browser swapping attack switching to fragment response mode
@@ -280,13 +435,13 @@ public class CallbackServlet extends HttpServlet {
       return;
     }
     var authenticationState =
-        Optional.ofNullable(req.getSession(false))
+        Optional.ofNullable(session)
             .map(
-                session -> {
+                session_ -> {
                   var state =
                       (AuthenticationState)
-                          session.getAttribute(AuthenticationState.SESSION_ATTRIBUTE_NAME);
-                  session.removeAttribute(AuthenticationState.SESSION_ATTRIBUTE_NAME);
+                          session_.getAttribute(AuthenticationState.SESSION_ATTRIBUTE_NAME);
+                  session_.removeAttribute(AuthenticationState.SESSION_ATTRIBUTE_NAME);
                   return state;
                 })
             .orElse(null);
@@ -304,8 +459,8 @@ public class CallbackServlet extends HttpServlet {
             .build();
     TokenResponse tokenResponse;
     try {
-      tokenResponse = OIDCTokenResponseParser.parse(send(tokenRequest));
-    } catch (ParseException | IOException e) {
+      tokenResponse = send(session, tokenRequest);
+    } catch (ParseException | IOException | JOSEException e) {
       sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error in token request", e);
       return;
     }
@@ -333,6 +488,7 @@ public class CallbackServlet extends HttpServlet {
       return;
     }
     var successResponse = (OIDCTokenResponse) tokenResponse.toSuccessResponse();
+    assert session != null;
 
     IDTokenClaimsSet idTokenClaims;
     try {
@@ -355,8 +511,8 @@ public class CallbackServlet extends HttpServlet {
             successResponse.getOIDCTokens().getAccessToken());
     UserInfoResponse userInfoResponse;
     try {
-      userInfoResponse = UserInfoResponse.parse(send(userInfoRequest));
-    } catch (ParseException | IOException e) {
+      userInfoResponse = send(session, userInfoRequest);
+    } catch (ParseException | IOException | JOSEException e) {
       revokeTokens(successResponse);
       sendError(
           resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error in User Info request", e);
@@ -389,19 +545,83 @@ public class CallbackServlet extends HttpServlet {
     req.changeSessionId();
     var sessionInfo =
         new SessionInfo(successResponse.getOIDCTokens().getIDToken(), idTokenClaims, userInfo);
-    HttpSession session = req.getSession();
     session.setAttribute(SessionInfo.SESSION_ATTRIBUTE_NAME, sessionInfo);
     userPrincipalFactory.userAuthenticated(sessionInfo, session);
     oauthTokensHandler.tokensAcquired(successResponse, session);
     Utils.sendRedirect(resp, authenticationState.requestUri());
   }
 
-  private HTTPResponse send(Request request) throws IOException {
-    if (httpRequestSender != null) {
-      return request.toHTTPRequest().send(httpRequestSender);
-    } else {
-      return request.toHTTPRequest().send();
+  private TokenResponse send(@Nullable HttpSession session, TokenRequest tokenRequest)
+      throws IOException, JOSEException, ParseException {
+    return send(
+        session,
+        tokenRequest,
+        null,
+        OIDCTokenResponseParser::parse,
+        TokenResponse::toErrorResponse);
+  }
+
+  private UserInfoResponse send(HttpSession session, UserInfoRequest userInfoRequest)
+      throws IOException, JOSEException, ParseException {
+    return send(
+        session,
+        userInfoRequest,
+        userInfoRequest.getAccessToken(),
+        UserInfoResponse::parse,
+        UserInfoResponse::toErrorResponse);
+  }
+
+  @FunctionalInterface
+  private interface ResponseParser<R extends Response> {
+    R parse(HTTPResponse response) throws ParseException;
+  }
+
+  private <R extends Response> R send(
+      @Nullable HttpSession session,
+      Request request,
+      @Nullable AccessToken accessToken,
+      ResponseParser<R> responseParser,
+      Function<R, ErrorResponse> toErrorResponse)
+      throws IOException, JOSEException, ParseException {
+    var httpRequest = request.toHTTPRequest();
+    // If there's no point in using DPoP if there's no session
+    // Absence of a session only happens to exchange an auth code in a browser swapping attack,
+    // where the request is expected to fail anyway.
+    if (dpopSupport != null && session != null) {
+      var nonce = requireNonNull(dpopNonceStore).getNonce(httpRequest.getURI());
+      var proofFactory = dpopSupport.getProofFactory(session);
+      httpRequest.setDPoP(
+          proofFactory.createDPoPJWT(
+              httpRequest.getMethod().toString(), httpRequest.getURI(), accessToken, nonce));
+      var httpResponse = send(httpRequest);
+      nonce = httpResponse.getDPoPNonce();
+      var response = responseParser.parse(httpResponse);
+      if (response.indicatesSuccess()
+          || !OAuth2Error.USE_DPOP_NONCE.equals(toErrorResponse.apply(response).getErrorObject())) {
+        return response;
+      }
+      httpRequest.setDPoP(
+          proofFactory.createDPoPJWT(
+              httpRequest.getMethod().toString(), httpRequest.getURI(), accessToken, nonce));
+      // fall-through to repeat the httpRequest with the new DPoP including the nonce
     }
+    return responseParser.parse(send(httpRequest));
+  }
+
+  private HTTPResponse send(HTTPRequest request) throws IOException {
+    HTTPResponse httpResponse;
+    if (httpRequestSender != null) {
+      httpResponse = request.send(httpRequestSender);
+    } else {
+      httpResponse = request.send();
+    }
+    if (dpopSupport != null) {
+      var nonce = httpResponse.getDPoPNonce();
+      if (nonce != null) {
+        requireNonNull(dpopNonceStore).setNonce(request.getURI(), nonce);
+      }
+    }
+    return httpResponse;
   }
 
   private void maybeRevokeTokens(TokenResponse response) {

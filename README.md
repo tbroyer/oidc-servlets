@@ -232,3 +232,22 @@ servletContext.setAttribute(
       }
     });
 ```
+
+### DPoP
+
+To use DPoP, register a `DPoPSupport` instance as a `ServletContext` attribute.
+For end-to-end binding of the entire authentication flow, pass that same `DPoPSupport` instance to the `AuthenticationRedirector` constructor.
+
+If the identity provider uses DPoP nonces, you can customize the way those nonces are remembered and used between requests by registering a `DPoPNonceStore` instance as a `ServletContext` attribute. This allows optimizing nonce usage compared to the default behavior based on the identity provider's own behavior.
+
+```java
+var configuration = new Configuration(/* … */);
+var dpopSupport = DPoPSupport.create(/* … */);
+var redirector = new AuthenticationRedirector(configuration, CALLBACK_PATH, dpopSupport);
+
+servletContext.setAttribute(Configuration.CONTEXT_ATTRIBUTE_NAME, configuration);
+servletContext.setAttribute(AuthenticationRedirector.CONTEXT_ATTRIBUTE_NAME, redirector);
+servletContext.setAttribute(DPoPSupport.CONTEXT_ATTRIBUTE_NAME, dpopSupport);
+servletContext.setAttribute(
+    DPoPNonceStore.CONTEXT_ATTRIBUTE_NAME, new SinglerDPoPNonceStore());
+```

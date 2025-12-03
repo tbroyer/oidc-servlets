@@ -4,6 +4,9 @@ import static jakarta.servlet.DispatcherType.FORWARD;
 import static jakarta.servlet.DispatcherType.REQUEST;
 import static java.util.Objects.requireNonNull;
 
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.Curve;
+import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.ClientID;
@@ -19,6 +22,7 @@ import net.ltgt.oidc.servlet.BackchannelLogoutServlet;
 import net.ltgt.oidc.servlet.BackchannelLogoutSessionListener;
 import net.ltgt.oidc.servlet.CallbackServlet;
 import net.ltgt.oidc.servlet.Configuration;
+import net.ltgt.oidc.servlet.DPoPSupport;
 import net.ltgt.oidc.servlet.HasRoleFilter;
 import net.ltgt.oidc.servlet.InMemoryLoggedOutSessionStore;
 import net.ltgt.oidc.servlet.IsAuthenticatedFilter;
@@ -52,6 +56,9 @@ public class Main {
             new ClientSecretBasic(
                 new ClientID(requireNonNull(System.getProperty("example.clientId"))),
                 new Secret(requireNonNull(System.getProperty("example.clientSecret")))));
+    var dpopSupport =
+        DPoPSupport.create(new ECKeyGenerator(Curve.P_256).generate(), JWSAlgorithm.ES256);
+    // No need for a DPoPNonceStore: Keycloak won't use DPoP nonces
 
     var server = new Server(Integer.getInteger("example.port", 8000));
 
@@ -70,7 +77,8 @@ public class Main {
     contextHandler.setAttribute(Configuration.CONTEXT_ATTRIBUTE_NAME, configuration);
     contextHandler.setAttribute(
         AuthenticationRedirector.CONTEXT_ATTRIBUTE_NAME,
-        new AuthenticationRedirector(configuration, CALLBACK_PATH));
+        new AuthenticationRedirector(configuration, CALLBACK_PATH, dpopSupport));
+    contextHandler.setAttribute(DPoPSupport.CONTEXT_ATTRIBUTE_NAME, dpopSupport);
     contextHandler.setAttribute(
         UserPrincipalFactory.CONTEXT_ATTRIBUTE_NAME, KeycloakUserPrincipal.FACTORY);
     contextHandler.setAttribute(

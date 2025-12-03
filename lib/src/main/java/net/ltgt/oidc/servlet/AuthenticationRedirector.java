@@ -36,10 +36,17 @@ public class AuthenticationRedirector {
 
   private final Configuration configuration;
   private final String callbackPath;
+  private final @Nullable DPoPSupport dpopSupport;
 
   public AuthenticationRedirector(Configuration configuration, String callbackPath) {
+    this(configuration, callbackPath, null);
+  }
+
+  public AuthenticationRedirector(
+      Configuration configuration, String callbackPath, @Nullable DPoPSupport dpopSupport) {
     this.configuration = requireNonNull(configuration);
     this.callbackPath = requireNonNull(callbackPath);
+    this.dpopSupport = dpopSupport;
   }
 
   /**
@@ -93,9 +100,10 @@ public class AuthenticationRedirector {
       @Nullable Consumer<AuthenticationRequest.Builder> configureAuthenticationRequest,
       URI baseUri,
       Consumer<URI> sendRedirect) {
-    State state = new State();
-    Nonce nonce = new Nonce();
-    CodeVerifier codeVerifier = new CodeVerifier();
+    var state = new State();
+    var nonce = new Nonce();
+    var codeVerifier = new CodeVerifier();
+    var dpopJkt = dpopSupport == null ? null : dpopSupport.getJWKThumbprintConfirmation(session);
     session.setAttribute(
         AuthenticationState.SESSION_ATTRIBUTE_NAME,
         new AuthenticationState(state, nonce, codeVerifier, returnTo));
@@ -114,7 +122,8 @@ public class AuthenticationRedirector {
         .state(state)
         .nonce(nonce)
         // From RFC: If the client is capable of using S256, it MUST use S256.
-        .codeChallenge(codeVerifier, CodeChallengeMethod.S256);
+        .codeChallenge(codeVerifier, CodeChallengeMethod.S256)
+        .dPoPJWKThumbprintConfirmation(dpopJkt);
     sendRedirect.accept(authenticationRequestBuilder.build().toURI());
   }
 
