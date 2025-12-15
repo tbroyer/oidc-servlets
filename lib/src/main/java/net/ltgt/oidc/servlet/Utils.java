@@ -2,7 +2,10 @@ package net.ltgt.oidc.servlet;
 
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.jwk.source.JWKSourceBuilder;
+import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPRequestSender;
+import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
+import com.nimbusds.openid.connect.sdk.op.ReadOnlyOIDCProviderMetadata;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletContext;
@@ -11,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.Map;
 
 public class Utils {
 
@@ -145,5 +149,31 @@ public class Utils {
       }
     }
     return jwkSource;
+  }
+
+  /**
+   * Resolves the {@link ReadOnlyOIDCProviderMetadata#getReadOnlyMtlsEndpointAliases()
+   * mtls_endpoint_aliases} of the given provider metadata.
+   *
+   * @return the passed in object if it doesn't have {@code mtls_endpoint_aliases}, or a new
+   *     provider metadata where the {@code mtls_endpoint_aliases} have been removed and merged into
+   *     the top-level object.
+   * @see Configuration
+   */
+  public static ReadOnlyOIDCProviderMetadata resolveMtlsEndpointAliases(
+      ReadOnlyOIDCProviderMetadata original) {
+    if (original.getReadOnlyMtlsEndpointAliases() == null) {
+      return original;
+    }
+    var json = original.toJSONObject();
+    @SuppressWarnings("unchecked")
+    var mtlsEndpointAliases = (Map<String, ?>) json.remove("mtls_endpoint_aliases");
+    json.putAll(mtlsEndpointAliases);
+    try {
+      return OIDCProviderMetadata.parse(json);
+    } catch (ParseException e) {
+      // This should never happen, as the original JSON had already been parsed
+      throw new RuntimeException(e);
+    }
   }
 }
