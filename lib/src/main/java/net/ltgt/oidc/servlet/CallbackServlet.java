@@ -15,7 +15,6 @@ import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.TokenResponse;
 import com.nimbusds.oauth2.sdk.http.HTTPRequestSender;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
-import com.nimbusds.oauth2.sdk.http.JakartaServletUtils;
 import com.nimbusds.oauth2.sdk.util.URLUtils;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponseParser;
@@ -33,11 +32,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -253,7 +254,13 @@ public class CallbackServlet extends HttpServlet {
     }
     AuthenticationResponse response;
     try {
-      response = AuthenticationResponseParser.parse(JakartaServletUtils.createHTTPRequest(req));
+      response =
+          AuthenticationResponseParser.parse(
+              URI.create(req.getRequestURL().toString()),
+              req.getParameterMap().entrySet().stream()
+                  .collect(
+                      Collectors.toUnmodifiableMap(
+                          Map.Entry::getKey, entry -> Arrays.asList(entry.getValue()))));
     } catch (ParseException e) {
       sendRedirectToError(req, resp, ERROR_PARSING_PARAMETERS, "Error parsing parameters", e);
       return;
@@ -267,6 +274,11 @@ public class CallbackServlet extends HttpServlet {
       return;
     }
     var code = response.toSuccessResponse().getAuthorizationCode();
+    if (code == null) {
+      // Might be a browser swapping attack switching to fragment response mode
+      sendRedirectToError(req, resp, ERROR_PARSING_PARAMETERS, "Error parsing parameters", null);
+      return;
+    }
     var authenticationState =
         Optional.ofNullable(req.getSession(false))
             .map(
