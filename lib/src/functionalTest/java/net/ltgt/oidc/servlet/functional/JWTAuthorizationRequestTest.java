@@ -10,13 +10,16 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.auth.PlainClientSecret;
+import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import java.net.URI;
 import java.util.function.Consumer;
 import net.ltgt.oidc.servlet.AuthenticationRedirector;
 import net.ltgt.oidc.servlet.IsAuthenticatedFilter;
+import net.ltgt.oidc.servlet.JWTAuthorizationRequestHelper;
 import net.ltgt.oidc.servlet.fixtures.WebDriverExtension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -32,30 +35,30 @@ public class JWTAuthorizationRequestTest {
           "simple",
           (configuration, callbackPath) ->
               new AuthenticationRedirector(configuration, callbackPath) {
+                // We know this is how our test Configuration is configured
+                private final Secret secret =
+                    ((PlainClientSecret)
+                            configuration
+                                .getClientAuthenticationSupplier()
+                                .getClientAuthentication())
+                        .getClientSecret();
+                private final JWTAuthorizationRequestHelper jwtAuthenticationRequestHelper =
+                    new JWTAuthorizationRequestHelper() {
+                      @Override
+                      protected SignedJWT sign(JWTClaimsSet claimsSet) throws JOSEException {
+                        var jar =
+                            new SignedJWT(
+                                new JWSHeader.Builder(JWSAlgorithm.HS256).type(TYPE).build(),
+                                claimsSet);
+                        jar.sign(new MACSigner(secret.getValueBytes()));
+                        return jar;
+                      }
+                    };
+
                 @Override
                 protected void sendRedirect(
                     AuthenticationRequest authenticationRequest, Consumer<URI> sendRedirect) {
-                  var jar =
-                      new SignedJWT(
-                          new JWSHeader.Builder(JWSAlgorithm.HS256).build(),
-                          authenticationRequest.toJWTClaimsSet());
-                  try {
-                    jar.sign(
-                        new MACSigner(
-                            ((PlainClientSecret)
-                                    configuration
-                                        .getClientAuthenticationSupplier()
-                                        .getClientAuthentication())
-                                .getClientSecret()
-                                .getValueBytes()));
-                  } catch (JOSEException e) {
-                    throw new RuntimeException(e);
-                  }
-                  sendRedirect.accept(
-                      new AuthenticationRequest.Builder(jar, authenticationRequest.getClientID())
-                          .endpointURI(authenticationRequest.getEndpointURI())
-                          .build()
-                          .toURI());
+                  jwtAuthenticationRequestHelper.sendRedirect(authenticationRequest, sendRedirect);
                 }
               },
           contextHandler -> {

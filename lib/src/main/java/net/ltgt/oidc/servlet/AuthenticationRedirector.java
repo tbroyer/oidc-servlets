@@ -30,6 +30,8 @@ import org.jspecify.annotations.Nullable;
  * @see IsAuthenticatedFilter
  * @see HasRoleFilter
  * @see LoginServlet
+ * @see JWTAuthorizationRequestHelper
+ * @see PushedAuthorizationRequestHelper
  */
 public class AuthenticationRedirector {
   public static final String CONTEXT_ATTRIBUTE_NAME = AuthenticationRedirector.class.getName();

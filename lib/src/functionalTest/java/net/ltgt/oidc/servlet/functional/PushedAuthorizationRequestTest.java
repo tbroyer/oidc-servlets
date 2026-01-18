@@ -5,16 +5,12 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static net.ltgt.oidc.servlet.fixtures.Helpers.login;
 import static net.ltgt.oidc.servlet.fixtures.Helpers.logoutFromIdP;
 
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.PushedAuthorizationRequest;
-import com.nimbusds.oauth2.sdk.PushedAuthorizationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.URI;
 import java.util.function.Consumer;
 import net.ltgt.oidc.servlet.AuthenticationRedirector;
 import net.ltgt.oidc.servlet.IsAuthenticatedFilter;
+import net.ltgt.oidc.servlet.PushedAuthorizationRequestHelper;
 import net.ltgt.oidc.servlet.fixtures.WebDriverExtension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -30,35 +26,14 @@ public class PushedAuthorizationRequestTest {
           "simple",
           (configuration, callbackPath) ->
               new AuthenticationRedirector(configuration, callbackPath) {
+                private final PushedAuthorizationRequestHelper pushedAuthorizationRequestHelper =
+                    new PushedAuthorizationRequestHelper(configuration);
+
                 @Override
                 protected void sendRedirect(
                     AuthenticationRequest authenticationRequest, Consumer<URI> sendRedirect) {
-                  var request =
-                      new PushedAuthorizationRequest(
-                          configuration
-                              .getProviderMetadata()
-                              .getPushedAuthorizationRequestEndpointURI(),
-                          configuration.getClientAuthenticationSupplier().getClientAuthentication(),
-                          authenticationRequest);
-                  PushedAuthorizationResponse response;
-                  try {
-                    response = PushedAuthorizationResponse.parse(request.toHTTPRequest().send());
-                  } catch (ParseException e) {
-                    throw new RuntimeException(e);
-                  } catch (IOException e) {
-                    throw new UncheckedIOException(e);
-                  }
-                  if (!response.indicatesSuccess()) {
-                    throw new RuntimeException(
-                        response.toErrorResponse().getErrorObject().toString());
-                  }
-                  sendRedirect.accept(
-                      new AuthenticationRequest.Builder(
-                              response.toSuccessResponse().getRequestURI(),
-                              authenticationRequest.getClientID())
-                          .endpointURI(authenticationRequest.getEndpointURI())
-                          .build()
-                          .toURI());
+                  pushedAuthorizationRequestHelper.sendRedirect(
+                      authenticationRequest, sendRedirect);
                 }
               },
           contextHandler -> {
