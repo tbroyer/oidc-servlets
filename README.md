@@ -25,6 +25,11 @@ It fulfills the following needs:
 * Dependency-injection friendly
 * OAuth tokens (access token and refresh token) obtained at authentication time should be exposed to the application and have their own lifecycle.
 
+The primary goal is to implement the [authorization code flow](https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth) with the (default) query response mode and [PKCE](https://datatracker.ietf.org/doc/html/rfc7636), [bearer tokens](https://datatracker.ietf.org/doc/html/rfc6750), client authentication using a [client secret with HTTP Basic](https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1), [RP-initiated logout](https://openid.net/specs/openid-connect-rpinitiated-1_0.html), and [backchannel logout](https://openid.net/specs/openid-connect-backchannel-1_0.html). Support for [DPoP](https://datatracker.ietf.org/doc/html/rfc9449) is also baked in.
+
+Hooks allow customizing the authentication request for, e.g., using the [form post response mode](https://openid.net/specs/oauth-v2-form-post-response-mode-1_0.html), pushed authorization requests ([PAR](https://datatracker.ietf.org/doc/html/rfc9126)), and/or JWT-secured authorization requests ([JAR](https://datatracker.ietf.org/doc/html/rfc9101)).
+It's also possible to authenticate the client using a client secret within the form post body, or through [mTLS](https://datatracker.ietf.org/doc/html/rfc8705) or [JWT](https://datatracker.ietf.org/doc/html/rfc7523).
+
 ## Example application
 
 First, start a [Keycloak](https://www.keycloak.org) server with an example configuration with Docker Compose:
@@ -251,3 +256,21 @@ servletContext.setAttribute(DPoPSupport.CONTEXT_ATTRIBUTE_NAME, dpopSupport);
 servletContext.setAttribute(
     DPoPNonceStore.CONTEXT_ATTRIBUTE_NAME, new SinglerDPoPNonceStore());
 ```
+
+## Specifications
+
+* [OpenID Connect Core](https://openid.net/specs/openid-connect-core-1_0.html) (encrypted ID Tokens aren't supported, as well as User Info responses as JWT)
+* [OpenID Connect Discovery](https://openid.net/specs/openid-connect-discovery-1_0.html) used indirectly through Nimbus `OIDCProviderMetadata.resolve()` to then create the OIDC-Servlet's `Configuration`
+* [OpenID Connect RP-Initiated Logout](https://openid.net/specs/openid-connect-rpinitiated-1_0.html)
+* [OpenID Connect Back-Channel Logout](https://openid.net/specs/openid-connect-backchannel-1_0.html)
+* [Proof Key for Code Exchange by OAuth Public Clients (RFC 7636)](https://datatracker.ietf.org/doc/html/rfc7636)
+* [OAuth 2.0 Token Revocation (RFC 7009)](https://datatracker.ietf.org/doc/html/rfc7009)
+* [The OAuth 2.0 Authorization Framework: Bearer Token Usage (RFC 6750)](https://datatracker.ietf.org/doc/html/rfc6750) to call the User Info Endpoint
+* [OAuth 2.0 Demonstrating Proof of Possession (DPoP)](https://datatracker.ietf.org/doc/html/)
+* [OAuth 2.0 Mutual-TLS Client Authentication and Certificate-Bound Access Tokens](https://datatracker.ietf.org/doc/html/rfc8705)
+* [OAuth 2.1 (draft)](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1)
+* [OAuth 2.0 Threat Model and Security Considerations (RFC 6819)](https://datatracker.ietf.org/doc/html/rfc6819) / [Best Current Practice for OAuth 2.0 Security (RFC 9700)](https://datatracker.ietf.org/doc/html/rfc9700)
+* [OAuth 2.0 Form Post Response Mode](https://openid.net/specs/oauth-v2-form-post-response-mode-1_0.html) is supported, but not used by default; note that it requires that the identity provider and the application are _same site_ (or that the servlet session cookies be set with `SameSite=None` which would be a very bad idea)
+* [OAuth 2.0 Pushed Authorization Requests](https://datatracker.ietf.org/doc/html/rfc9126)
+* [JWT-Secured Authorization Request (JAR)](https://datatracker.ietf.org/doc/html/rfc9101)
+* [JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants](https://datatracker.ietf.org/doc/html/rfc7523)
