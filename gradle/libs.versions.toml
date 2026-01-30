@@ -43,7 +43,7 @@ errorprone = [ "errorprone-core", "nullaway" ]
 [plugins]
 errorprone = "net.ltgt.errorprone:5.0.0"
 jvmDependencyConflictResolution = "org.gradlex.jvm-dependency-conflict-resolution:2.5"
-nullaway = "net.ltgt.nullaway:2.4.0"
+nullaway = "net.ltgt.nullaway:3.0.0"
 spotless = "com.diffplug.spotless:8.2.1"
 testRetry = "org.gradle.test-retry:1.6.4"
 vanniktechMavenPublish = "com.vanniktech.maven.publish:0.36.0"
