@@ -28,12 +28,14 @@ public interface DPoPSupport {
   String CONTEXT_ATTRIBUTE_NAME = DPoPSupport.class.getName();
 
   static DPoPSupport create(JWK key, JWSAlgorithm jwsAlgorithm) throws JOSEException {
-    return create(new DefaultDPoPProofFactory(key, jwsAlgorithm));
+    return create(new DefaultDPoPProofFactory(requireNonNull(key), requireNonNull(jwsAlgorithm)));
   }
 
   static DPoPSupport create(JWK key, JWSAlgorithm jwsAlgorithm, @Nullable Provider jcaProvider)
       throws JOSEException {
-    return create(new DefaultDPoPProofFactory(key, jwsAlgorithm, jcaProvider));
+    return create(
+        new DefaultDPoPProofFactory(
+            requireNonNull(key), requireNonNull(jwsAlgorithm), jcaProvider));
   }
 
   static DPoPSupport create(DefaultDPoPProofFactory proofFactory) throws JOSEException {
@@ -42,6 +44,8 @@ public interface DPoPSupport {
   }
 
   static DPoPSupport create(DPoPProofFactory proofFactory, JWKThumbprintConfirmation jkt) {
+    requireNonNull(proofFactory);
+    requireNonNull(jkt);
     return new DPoPSupport() {
       @Override
       public DPoPProofFactory getProofFactory(HttpSession session) {

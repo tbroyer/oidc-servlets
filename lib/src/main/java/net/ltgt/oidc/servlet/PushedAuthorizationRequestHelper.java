@@ -1,5 +1,7 @@
 package net.ltgt.oidc.servlet;
 
+import static java.util.Objects.requireNonNull;
+
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.PushedAuthorizationRequest;
 import com.nimbusds.oauth2.sdk.PushedAuthorizationResponse;
@@ -46,7 +48,7 @@ public class PushedAuthorizationRequestHelper {
 
   public PushedAuthorizationRequestHelper(
       Configuration configuration, @Nullable HTTPRequestSender httpRequestSender) {
-    this.configuration = configuration;
+    this.configuration = requireNonNull(configuration);
     this.httpRequestSender = httpRequestSender;
   }
 

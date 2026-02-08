@@ -108,7 +108,7 @@ public class AuthenticationRedirector {
     var dpopJkt = dpopSupport == null ? null : dpopSupport.getJWKThumbprintConfirmation(session);
     session.setAttribute(
         AuthenticationState.SESSION_ATTRIBUTE_NAME,
-        new AuthenticationState(state, nonce, codeVerifier, returnTo));
+        new AuthenticationState(state, nonce, codeVerifier, requireNonNull(returnTo)));
     AuthenticationRequest.Builder authenticationRequestBuilder =
         new AuthenticationRequest.Builder(
             ResponseType.CODE,

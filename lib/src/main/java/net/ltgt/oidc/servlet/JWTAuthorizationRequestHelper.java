@@ -1,5 +1,7 @@
 package net.ltgt.oidc.servlet;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.errorprone.annotations.ForOverride;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
@@ -59,7 +61,7 @@ public abstract class JWTAuthorizationRequestHelper {
     if (jcaProvider != null) {
       factory.getJCAContext().setProvider(jcaProvider);
     }
-    var jwsSigner = factory.createJWSSigner(jwk, jwsAlg);
+    var jwsSigner = factory.createJWSSigner(requireNonNull(jwk), requireNonNull(jwsAlg));
 
     return new JWTAuthorizationRequestHelper() {
       @Override

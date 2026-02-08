@@ -18,6 +18,11 @@ testing {
         withType<JvmTestSuite>().configureEach {
             useJUnitJupiter(libs.versions.junitJupiter)
         }
+        named<JvmTestSuite>("test") {
+            dependencies {
+                implementation(libs.guava.testlib)
+            }
+        }
         register<JvmTestSuite>("functionalTest") {
             dependencies {
                 implementation(project())
