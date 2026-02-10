@@ -16,6 +16,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Map;
 
+/** Utility constants and methods. */
 public class Utils {
 
   /**

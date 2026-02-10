@@ -15,6 +15,15 @@ import jakarta.ws.rs.core.SecurityContext;
 import java.io.IOException;
 import net.ltgt.oidc.servlet.AuthenticationRedirector;
 
+/**
+ * Base class for filters that redirect to the OpenID Provider when the user is not authorized.
+ *
+ * <p>Requests that are authorized (and pass down the filter chain) are additionally marked with the
+ * {@link #IS_PRIVATE_PROPERTY_NAME} {@linkplain ContainerRequestContext#getProperty(String)
+ * property}.
+ *
+ * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html">OpenID Connect Core 1.0</a>
+ */
 @Priority(Priorities.AUTHORIZATION)
 public abstract class AbstractAuthorizationFilter implements ContainerRequestFilter {
   public static final String IS_PRIVATE_PROPERTY_NAME =

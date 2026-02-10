@@ -106,8 +106,9 @@ public abstract class AbstractAuthorizationFilter extends HttpFilter {
    * This method is called whenever the user is not authorized and the request is a {@linkplain
    * Utils#isSafeMethod safe} {@linkplain Utils#isNavigation navigation} request.
    *
-   * <p>This implementation calls {@link #sendForbidden} whenever the user is authenticated, and
-   * defers to {@link #doRedirectToAuthenticationEndpoint} otherwise.
+   * <p>This implementation calls {@link #sendForbidden sendForbidden} whenever the user is
+   * authenticated, and defers to {@link #doRedirectToAuthenticationEndpoint
+   * doRedirectToAuthenticationEndpoint} otherwise.
    */
   @ForOverride
   protected void redirectToAuthenticationEndpoint(HttpServletRequest req, HttpServletResponse res)
@@ -126,8 +127,8 @@ public abstract class AbstractAuthorizationFilter extends HttpFilter {
    * @implSpec The default implementation simply calls the globally configured {@link
    *     AuthenticationRedirector}, and allows {@linkplain #configureAuthenticationRequest
    *     configuring the authentication request}.
-   * @see #configureAuthenticationRequest
-   * @see #sendUnauthorized
+   * @see #configureAuthenticationRequest(HttpServletRequest, AuthenticationRequest.Builder)
+   * @see #sendUnauthorized(HttpServletRequest, HttpServletResponse)
    */
   @ForOverride
   protected void doRedirectToAuthenticationEndpoint(HttpServletRequest req, HttpServletResponse res)
@@ -143,9 +144,9 @@ public abstract class AbstractAuthorizationFilter extends HttpFilter {
    * Configures the authentication request when redirecting to the OpenID Provider.
    *
    * <p>This method is called by the {@link AuthenticationRedirector} called by {@link
-   * #redirectToAuthenticationEndpoint}.
+   * #redirectToAuthenticationEndpoint redirectToAuthenticationEndpoint}.
    *
-   * @see #redirectToAuthenticationEndpoint
+   * @see #redirectToAuthenticationEndpoint(HttpServletRequest, HttpServletResponse)
    */
   @ForOverride
   protected void configureAuthenticationRequest(
@@ -155,10 +156,10 @@ public abstract class AbstractAuthorizationFilter extends HttpFilter {
    * This method is called whenever the user is not authorized and the request is <b>not</b> a
    * {@linkplain Utils#isSafeMethod safe} {@linkplain Utils#isNavigation navigation} request.
    *
-   * <p>This implementation calls {@link #sendForbidden} whenever the user is authenticated, and
-   * defers to {@link #doSendUnauthorized} otherwise.
+   * <p>This implementation calls {@link #sendForbidden sendForbidden} whenever the user is
+   * authenticated, and defers to {@link #doSendUnauthorized doSendUnauthorized} otherwise.
    *
-   * @see #redirectToAuthenticationEndpoint
+   * @see #redirectToAuthenticationEndpoint(HttpServletRequest, HttpServletResponse)
    */
   @ForOverride
   protected void sendUnauthorized(HttpServletRequest req, HttpServletResponse res)
@@ -177,8 +178,8 @@ public abstract class AbstractAuthorizationFilter extends HttpFilter {
    * @implSpec The default implementation simply calls {@code res.sendError(SC_UNAUTHORIZED)}. This
    *     is not strictly HTTP-compliant as it's missing the {@code WWW-Authenticate} response
    *     header, but is a good way to signal the error to JavaScript clients making an AJAX request.
-   * @see #sendUnauthorized
-   * @see #redirectToAuthenticationEndpoint
+   * @see #sendUnauthorized(HttpServletRequest, HttpServletResponse)
+   * @see #redirectToAuthenticationEndpoint(HttpServletRequest, HttpServletResponse)
    */
   @ForOverride
   protected void doSendUnauthorized(HttpServletRequest req, HttpServletResponse res)

@@ -65,9 +65,16 @@ public class AuthenticationRedirector {
    * Redirects to the OpenID Provider, returning to the given page when coming back, and possibly
    * configuring the authentication request further.
    *
-   * <p>This is equivalent to {@code redirectToAuthenticationEndpoint(req.getSession(), returnTo,
-   * configureAuthenticationRequest, URI.create(req.getRequestURL().toString()), uri ->
-   * Utils.sendRedirect(res, uri.toASCIIString()))}.
+   * <p>This is equivalent to
+   *
+   * {@snippet lang=java :
+   * redirectToAuthenticationEndpoint(
+   *     req.getSession(),
+   *     returnTo,
+   *     configureAuthenticationRequest,
+   *     URI.create(req.getRequestURL().toString()),
+   *     uri -> Utils.sendRedirect(res, uri.toASCIIString()));
+   * }
    */
   public void redirectToAuthenticationEndpoint(
       HttpServletRequest req,
@@ -145,10 +152,13 @@ public class AuthenticationRedirector {
 
   /**
    * Called by {@link #redirectToAuthenticationEndpoint(HttpServletRequest, HttpServletResponse,
-   * String, Consumer) redirectToAuthenticationEndpoint} to actually send the redirect.
+   * String, Consumer) redirectToAuthenticationEndpoint} to compute the URI to redirect to and
+   * actually send the redirect (through {@code sendRedirect}).
    *
-   * @implSpec The default implementation.simply calls {@code
+   * @implSpec The default implementation simply calls {@code
    *     sendRedirect.accept(authenticationRequest.toURI())}.
+   * @see JWTAuthorizationRequestHelper
+   * @see PushedAuthorizationRequestHelper
    */
   @ForOverride
   protected void sendRedirect(

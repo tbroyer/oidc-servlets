@@ -9,6 +9,7 @@ import net.ltgt.oidc.servlet.AuthenticationRedirector;
 import net.ltgt.oidc.servlet.CallbackServlet;
 import org.jspecify.annotations.Nullable;
 
+/** Utility constants and methods. */
 public class Utils {
 
   private Utils() {

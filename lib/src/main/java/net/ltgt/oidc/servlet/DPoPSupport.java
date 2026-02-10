@@ -27,10 +27,15 @@ import org.jspecify.annotations.Nullable;
 public interface DPoPSupport {
   String CONTEXT_ATTRIBUTE_NAME = DPoPSupport.class.getName();
 
+  /** Creates a {@link DPoPSupport} instance with the given private key and signature algorithm. */
   static DPoPSupport create(JWK key, JWSAlgorithm jwsAlgorithm) throws JOSEException {
     return create(new DefaultDPoPProofFactory(requireNonNull(key), requireNonNull(jwsAlgorithm)));
   }
 
+  /**
+   * Creates a {@link DPoPSupport} instance with the given private key, signature algorithm, and JCA
+   * provider.
+   */
   static DPoPSupport create(JWK key, JWSAlgorithm jwsAlgorithm, @Nullable Provider jcaProvider)
       throws JOSEException {
     return create(
@@ -38,11 +43,16 @@ public interface DPoPSupport {
             requireNonNull(key), requireNonNull(jwsAlgorithm), jcaProvider));
   }
 
+  /** Creates a {@link DPoPSupport} instance with the given DPoP proof factory. */
   static DPoPSupport create(DefaultDPoPProofFactory proofFactory) throws JOSEException {
     return create(
         requireNonNull(proofFactory), JWKThumbprintConfirmation.of(proofFactory.getPublicJWK()));
   }
 
+  /**
+   * Creates a {@link DPoPSupport} instance with the given DPoP proof factory and public key
+   * thumbprint.
+   */
   static DPoPSupport create(DPoPProofFactory proofFactory, JWKThumbprintConfirmation jkt) {
     requireNonNull(proofFactory);
     requireNonNull(jkt);
