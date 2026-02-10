@@ -36,7 +36,7 @@ import org.jspecify.annotations.Nullable;
  * @see <a href="https://openid.net/specs/openid-connect-backchannel-1_0.html">OpenID Connect
  *     Back-Channel Logout 1.0</a>
  */
-public class BackchannelLogoutSessionListener
+public final class BackchannelLogoutSessionListener
     implements HttpSessionAttributeListener, HttpSessionIdListener {
   private @Nullable LoggedOutSessionStore loggedOutSessionStore;
 

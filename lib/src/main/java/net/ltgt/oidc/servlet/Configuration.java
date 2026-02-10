@@ -70,7 +70,7 @@ import com.nimbusds.openid.connect.sdk.op.ReadOnlyOIDCProviderMetadata;
  *
  * @see <a href="https://openid.net/specs/openid-connect-core-1_0.html">OpenID Connect Core 1.0</a>
  */
-public class Configuration {
+public final class Configuration {
   public static final String CONTEXT_ATTRIBUTE_NAME = Configuration.class.getName();
 
   private final ReadOnlyOIDCProviderMetadata providerMetadata;
