@@ -69,8 +69,7 @@ public class Main {
             new ClientSecretBasic(
                 new ClientID(requireNonNull(System.getProperty("example.clientId"))),
                 new Secret(requireNonNull(System.getProperty("example.clientSecret")))));
-    var dpopSupport =
-        DPoPSupport.create(new ECKeyGenerator(Curve.P_256).generate(), JWSAlgorithm.ES256);
+    var dpopSupport = DPoPSupport.perSession(new ECKeyGenerator(Curve.P_256), JWSAlgorithm.ES256);
     // No need for a DPoPNonceStore: Keycloak won't use DPoP nonces
 
     var server = new Server(Integer.getInteger("example.port", 8000));

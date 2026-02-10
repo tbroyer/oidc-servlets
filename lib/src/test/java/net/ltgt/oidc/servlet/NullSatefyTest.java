@@ -130,6 +130,7 @@ public class NullSatefyTest {
             .setDefault(
                 JWKThumbprintConfirmation.class, new JWKThumbprintConfirmation(Base64URL.from("")));
     testPublicApi(tester, DPoPSupport.class, null);
+    testPublicApi(tester, PerSessionDPoPSupport.class, null);
   }
 
   @Test

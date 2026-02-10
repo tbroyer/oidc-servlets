@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.gen.JWKGenerator;
 import com.nimbusds.oauth2.sdk.dpop.DPoPProofFactory;
 import com.nimbusds.oauth2.sdk.dpop.DefaultDPoPProofFactory;
 import com.nimbusds.oauth2.sdk.dpop.JWKThumbprintConfirmation;
@@ -36,6 +37,7 @@ import org.jspecify.annotations.Nullable;
  * DPoPSupport) AuthenticationRedirector} constructor for improved security (end-to-end binding of
  * the entire authentication flow).
  *
+ * @see PerSessionDPoPSupport
  * @see <a href="https://datatracker.ietf.org/doc/html/rfc9449">OAuth 2.0 Demonstrating Proof of
  *     Possession (DPoP)</a>
  */
@@ -80,6 +82,32 @@ public interface DPoPSupport {
       @Override
       public JWKThumbprintConfirmation getJWKThumbprintConfirmation(HttpSession session) {
         return jkt;
+      }
+    };
+  }
+
+  /**
+   * Creates a {@link DPoPSupport} instance that generates a private key per {@linkplain HttpSession
+   * session} with the given key generator and signature algorithm.
+   */
+  static DPoPSupport perSession(JWKGenerator<?> keyGenerator, JWSAlgorithm jwsAlgorithm)
+      throws JOSEException {
+    return perSession(keyGenerator, jwsAlgorithm, null);
+  }
+
+  /**
+   * Creates a {@link DPoPSupport} instance that generates a private key per {@linkplain HttpSession
+   * session} with the given key generator and signature algorithm.
+   */
+  static DPoPSupport perSession(
+      JWKGenerator<?> keyGenerator, JWSAlgorithm jwsAlgorithm, @Nullable Provider jcaProvider)
+      throws JOSEException {
+    // validate the inputs
+    new DefaultDPoPProofFactory(keyGenerator.generate(), requireNonNull(jwsAlgorithm), jcaProvider);
+    return new PerSessionDPoPSupport(requireNonNull(jwsAlgorithm), jcaProvider) {
+      @Override
+      protected JWK generatePrivateKey() throws JOSEException {
+        return keyGenerator.generate();
       }
     };
   }

@@ -18,6 +18,9 @@ package net.ltgt.oidc.servlet;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.testing.SerializableTester;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.Curve;
+import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
 import com.nimbusds.jwt.PlainJWT;
 import com.nimbusds.oauth2.sdk.id.Audience;
 import com.nimbusds.oauth2.sdk.id.Issuer;
@@ -61,5 +64,15 @@ public class SerializabilityTest {
   @Test
   void testLogoutState() {
     SerializableTester.reserializeAndAssert(new LogoutState(new State(), "/"));
+  }
+
+  @Test
+  void testDPoPSessionData() throws Exception {
+    var initial =
+        new PerSessionDPoPSupport.DPoPSessionData(
+            new ECKeyGenerator(Curve.P_256).generate(), JWSAlgorithm.ES256);
+    var deserialized = SerializableTester.reserialize(initial);
+    assertThat(deserialized.key).isEqualTo(initial.key);
+    assertThat(deserialized.jwsAlgorithm).isEqualTo(initial.jwsAlgorithm);
   }
 }
