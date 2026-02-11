@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static java.util.Objects.requireNonNull;
 import static net.ltgt.oidc.servlet.fixtures.Helpers.login;
+import static net.ltgt.oidc.servlet.fixtures.Helpers.logoutFromIdP;
 import static net.ltgt.oidc.servlet.fixtures.WebServerExtension.CALLBACK_PATH;
 import static org.openqa.selenium.support.ui.ExpectedConditions.urlMatches;
 
@@ -17,6 +18,7 @@ import net.ltgt.oidc.servlet.AuthenticationRedirector;
 import net.ltgt.oidc.servlet.CallbackServlet;
 import net.ltgt.oidc.servlet.IsAuthenticatedFilter;
 import net.ltgt.oidc.servlet.fixtures.WebDriverExtension;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -74,8 +76,19 @@ public class BrowserSwappingTest {
               contextHandler.addFilter(IsAuthenticatedFilter.class, "/*", null);
             });
 
+    private final WebDriver victimDriver;
+
+    public WithQueryResponseForm(WebDriver victimDriver) {
+      this.victimDriver = victimDriver;
+    }
+
+    @AfterEach
+    public void logout() {
+      logoutFromIdP(victimDriver, server);
+    }
+
     @Test
-    void test(WebDriver attackerDriver, WebDriver victimDriver) {
+    void test(WebDriver attackerDriver) {
       // Attacker:
       attackerDriver.get(server.getURI("/"));
       new WebDriverWait(attackerDriver, Duration.ofSeconds(2))
@@ -139,8 +152,19 @@ public class BrowserSwappingTest {
               contextHandler.addFilter(IsAuthenticatedFilter.class, "/*", null);
             });
 
+    private final WebDriver victimDriver;
+
+    public WithFragmentResponseForm(WebDriver victimDriver) {
+      this.victimDriver = victimDriver;
+    }
+
+    @AfterEach
+    public void logout() {
+      logoutFromIdP(victimDriver, server);
+    }
+
     @Test
-    void test(WebDriver attackerDriver, WebDriver victimDriver) {
+    void test(WebDriver attackerDriver) {
       // Attacker:
       attackerDriver.get(server.getURI("/"));
       new WebDriverWait(attackerDriver, Duration.ofSeconds(2))
