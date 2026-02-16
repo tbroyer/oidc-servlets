@@ -108,5 +108,6 @@ tasks.withType<Javadoc>().configureEach {
 spotless {
     java {
         googleJavaFormat(project.versionCatalogs.named("libs").findVersion("googleJavaFormat").orElseThrow().requiredVersion)
+        licenseHeaderFile(rootProject.file("LICENSE.header"))
     }
 }
