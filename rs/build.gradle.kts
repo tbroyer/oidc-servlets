@@ -9,6 +9,10 @@ dependencies {
     api(platform(projects.oidcServletsBom))
 
     api(projects.oidcServlets)
+    api(libs.jspecify)
+    api(libs.errorprone.annotations)
+    api(libs.nimbus.oidcSdk)
+    api(libs.jakarta.servletApi)
     api(libs.jakarta.rsApi)
     api(libs.jakarta.annotationApi)
 }
