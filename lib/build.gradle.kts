@@ -12,6 +12,7 @@ dependencies {
     api(libs.jspecify)
     api(libs.errorprone.annotations)
     api(libs.nimbus.oidcSdk)
+    api(libs.nimbus.joseJwt)
     api(libs.jakarta.servletApi)
 
     testFixturesApi(libs.junitJupiter.api)

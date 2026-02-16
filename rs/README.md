@@ -5,7 +5,7 @@ OIDC-Servlets+RS is a companion library to [OIDC-Servlets](../README.md) providi
 ## Usage
 
 Add dependencies on [`net.ltgt.oidc:oidc-servlets`](https://central.sonatype.com/artifact/net.ltgt.oidc/oidc-servlets) and [`net.ltgt.oidc:oidc-servlets-rs`](https://central.sonatype.com/artifact/net.ltgt.oidc/oidc-servlets-rs). You can also use the [`net.ltgt.oidc:oidc-servlets-bom`](https://central.sonatype.com/artifact/net.ltgt.oidc/oidc-servlets-bom) BOM to align those dependencies on the same version.
-You should also add a dependency on [`com.nimbusds:oauth2-oidc-sdk`](https://central.sonatype.com/artifact/com.nimbusds/oauth2-oidc-sdk) so you can keep it up-to-date independently of OIDC-Servlets.
+You should also add dependencies on [`com.nimbusds:oauth2-oidc-sdk`](https://central.sonatype.com/artifact/com.nimbusds/oauth2-oidc-sdk) and [`com.nimbusds:nimbus-jose-jwt`](https://central.sonatype.com/artifact/com.nimbusds/nimbus-jose-jwt) so you can keep them up-to-date independently of OIDC-Servlets+RS.
 
 Configure the `UserFilter` and `CallbackServlet` from [OIDC-Servlets](../README.md#usage). You can also use the other servlets from OIDC-Servlets: `LoginServlet`, `LogoutServlet`, `LogoutCallbackServlet`, and `BackchannelLogoutServlet`.
 

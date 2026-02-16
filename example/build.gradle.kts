@@ -5,6 +5,8 @@ plugins {
 
 dependencies {
     implementation(projects.oidcServlets)
+    implementation(libs.nimbus.oidcSdk)
+    implementation(libs.nimbus.joseJwt)
     implementation(platform(libs.jetty.bom))
     implementation(platform(libs.jetty.ee10.bom))
     implementation(libs.jetty.servlet)
