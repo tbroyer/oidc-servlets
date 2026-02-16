@@ -75,16 +75,27 @@ tasks.withType<Javadoc>().configureEach {
         addStringOption("-release", java.sourceCompatibility.majorVersion)
         addBooleanOption("Xdoclint:-missing", true)
         addStringOption("-link-modularity-mismatch", "info")
-        links(
+        linksOffline(
             "https://jakarta.ee/specifications/servlet/6.0/apidocs/",
-            "https://checkerframework.org/api/",
-            "https://errorprone.info/api/latest/"
-        )
-        // Nimbus OIDC SDK javadoc doesn't include a package-list
+            rootProject.file("build-logic/src/javadoc-link/servlet/").toRelativeString(projectDir))
+        linksOffline(
+            "https://jakarta.ee/specifications/restful-ws/4.0/apidocs/",
+            rootProject.file("build-logic/src/javadoc-link/restful-ws/").toRelativeString(projectDir))
+        linksOffline(
+            "https://jakarta.ee/specifications/annotations/2.1/apidocs/",
+            rootProject.file("build-logic/src/javadoc-link/jakarta.annotation/").toRelativeString(projectDir))
+        linksOffline(
+            "https://jspecify.dev/docs/api/",
+            rootProject.file("build-logic/src/javadoc-link/jspecify/").toRelativeString(projectDir))
+        linksOffline(
+            "https://errorprone.info/api/latest/",
+            rootProject.file("build-logic/src/javadoc-link/errorprone/").toRelativeString(projectDir))
         linksOffline(
             "https://javadoc.io/doc/com.nimbusds/oauth2-oidc-sdk/latest/",
-            rootProject.file("build-logic/src/javadoc-link/nimbusds-oidc-sdk/").toRelativeString(projectDir)
-        )
+            rootProject.file("build-logic/src/javadoc-link/oauth2-oidc-sdk/").toRelativeString(projectDir))
+        linksOffline(
+            "https://javadoc.io/doc/com.nimbusds/nimbus-jose-jwt/latest/",
+            rootProject.file("build-logic/src/javadoc-link/nimbus-jose-jwt/").toRelativeString(projectDir))
         tags(
             "implSpec:a:Implementation Specification:",
         )
