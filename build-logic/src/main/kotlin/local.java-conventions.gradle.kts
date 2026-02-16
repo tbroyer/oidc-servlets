@@ -96,6 +96,9 @@ tasks.withType<Javadoc>().configureEach {
         linksOffline(
             "https://javadoc.io/doc/com.nimbusds/nimbus-jose-jwt/latest/",
             rootProject.file("build-logic/src/javadoc-link/nimbus-jose-jwt/").toRelativeString(projectDir))
+        linksOffline(
+            "https://javadoc.io/doc/net.ltgt.oidc/oidc-servlets/$version/",
+            rootProject.file("build-logic/src/javadoc-link/oidc-servlets/").toRelativeString(projectDir))
         tags(
             "implSpec:a:Implementation Specification:",
         )
