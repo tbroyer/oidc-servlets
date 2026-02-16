@@ -16,7 +16,6 @@
 package net.ltgt.oidc.servlet;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import com.nimbusds.openid.connect.sdk.claims.SessionID;
 import org.junit.jupiter.api.Test;
