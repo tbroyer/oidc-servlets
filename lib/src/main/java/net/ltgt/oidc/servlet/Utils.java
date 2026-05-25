@@ -29,6 +29,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 /** Utility constants and methods. */
@@ -120,13 +121,17 @@ public class Utils {
     if (returnTo == null) {
       return "/";
     }
-    var rootUri = URI.create(req.getRequestURL().toString()).resolve("/");
-    var returnToUri = rootUri.resolve(returnTo);
-    var relativized = rootUri.relativize(returnToUri);
-    if (relativized.equals(returnToUri)) {
+    try {
+      var rootUri = new URI(req.getRequestURL().toString()).resolve("/");
+      var returnToUri = rootUri.resolve(new URI(returnTo));
+      var relativized = rootUri.relativize(returnToUri);
+      if (relativized.equals(returnToUri)) {
+        return "/";
+      }
+      return "/" + relativized.toASCIIString();
+    } catch (URISyntaxException e) {
       return "/";
     }
-    return "/" + relativized.toASCIIString();
   }
 
   /**
