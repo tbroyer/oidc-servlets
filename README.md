@@ -254,7 +254,7 @@ servletContext.setAttribute(Configuration.CONTEXT_ATTRIBUTE_NAME, configuration)
 servletContext.setAttribute(AuthenticationRedirector.CONTEXT_ATTRIBUTE_NAME, redirector);
 servletContext.setAttribute(DPoPSupport.CONTEXT_ATTRIBUTE_NAME, dpopSupport);
 servletContext.setAttribute(
-    DPoPNonceStore.CONTEXT_ATTRIBUTE_NAME, new SinglerDPoPNonceStore());
+    DPoPNonceStore.CONTEXT_ATTRIBUTE_NAME, new SingleDPoPNonceStore());
 ```
 
 ## Specifications
