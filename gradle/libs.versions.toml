@@ -1,9 +1,9 @@
 # Try to maintain entries sorted alphabetically inside each "group".
 [versions]
 errorprone = "2.49.0"
-jetty = "12.1.9"
+jetty = "12.1.10"
 junitJupiter = "6.1.0"
-nullaway = "0.13.4"
+nullaway = "0.13.6"
 
 # Versions used in build-logic
 googleJavaFormat = "1.35.0"
@@ -22,7 +22,7 @@ jetty-servlet = { module = "org.eclipse.jetty.ee10:jetty-ee10-servlet" }
 jetty-slf4jImpl = { module = "org.eclipse.jetty:jetty-slf4j-impl" }
 jspecify = "org.jspecify:jspecify:1.0.0"
 junitJupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref="junitJupiter" }
-nimbus-joseJwt = "com.nimbusds:nimbus-jose-jwt:10.9"
+nimbus-joseJwt = "com.nimbusds:nimbus-jose-jwt:10.9.1"
 nimbus-oidcSdk = "com.nimbusds:oauth2-oidc-sdk:11.37.2"
 nullaway-annotations = { module = "com.uber.nullaway:nullaway-annotations", version.ref = "nullaway" }
 resteasy-bom = "org.jboss.resteasy:resteasy-bom:7.0.2.Final"
@@ -45,7 +45,7 @@ errorprone = [ "errorprone-core", "nullaway" ]
 [plugins]
 errorprone = "net.ltgt.errorprone:5.1.0"
 jvmDependencyConflictResolution = "org.gradlex.jvm-dependency-conflict-resolution:2.5"
-nullaway = "net.ltgt.nullaway:3.0.0"
+nullaway = "net.ltgt.nullaway:3.1.0"
 spotless = "com.diffplug.spotless:8.6.0"
 testRetry = "org.gradle.test-retry:1.6.5"
 vanniktechMavenPublish = "com.vanniktech.maven.publish:0.36.0"
