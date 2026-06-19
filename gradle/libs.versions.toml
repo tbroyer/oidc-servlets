@@ -3,7 +3,7 @@
 errorprone = "2.50.0"
 jetty = "12.1.10"
 junitJupiter = "6.1.0"
-nullaway = "0.13.6"
+nullaway = "0.13.7"
 
 # Versions used in build-logic
 googleJavaFormat = "1.35.0"
@@ -27,7 +27,7 @@ nimbus-oidcSdk = "com.nimbusds:oauth2-oidc-sdk:11.37.2"
 nullaway-annotations = { module = "com.uber.nullaway:nullaway-annotations", version.ref = "nullaway" }
 resteasy-bom = "org.jboss.resteasy:resteasy-bom:7.0.2.Final"
 resteasy-core = { module = "org.jboss.resteasy:resteasy-core" }
-selenium = "org.seleniumhq.selenium:selenium-java:4.44.0"
+selenium = "org.seleniumhq.selenium:selenium-java:4.45.0"
 truth = "com.google.truth:truth:1.4.5"
 
 # Versions used in build-logic, libraries added here for Dependabot
@@ -46,6 +46,6 @@ errorprone = [ "errorprone-core", "nullaway" ]
 errorprone = "net.ltgt.errorprone:5.1.0"
 jvmDependencyConflictResolution = "org.gradlex.jvm-dependency-conflict-resolution:2.5"
 nullaway = "net.ltgt.nullaway:3.1.0"
-spotless = "com.diffplug.spotless:8.6.0"
+spotless = "com.diffplug.spotless:8.7.0"
 testRetry = "org.gradle.test-retry:1.6.5"
 vanniktechMavenPublish = "com.vanniktech.maven.publish:0.36.0"
