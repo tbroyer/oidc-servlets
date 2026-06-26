@@ -48,4 +48,4 @@ jvmDependencyConflictResolution = "org.gradlex.jvm-dependency-conflict-resolutio
 nullaway = "net.ltgt.nullaway:3.1.0"
 spotless = "com.diffplug.spotless:8.7.0"
 testRetry = "org.gradle.test-retry:1.6.5"
-vanniktechMavenPublish = "com.vanniktech.maven.publish:0.36.0"
+vanniktechMavenPublish = "com.vanniktech.maven.publish:0.37.0"
