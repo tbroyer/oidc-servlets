@@ -76,30 +76,31 @@ tasks.withType<Javadoc>().configureEach {
         addStringOption("-release", java.sourceCompatibility.majorVersion)
         addBooleanOption("Xdoclint:-missing", true)
         addStringOption("-link-modularity-mismatch", "info")
+        val relativeRootDir = rootDir.toRelativeString(projectDir)
         linksOffline(
             "https://jakarta.ee/specifications/servlet/6.0/apidocs/",
-            rootProject.file("build-logic/src/javadoc-link/servlet/").toRelativeString(projectDir))
+            "$relativeRootDir/build-logic/src/javadoc-link/servlet/")
         linksOffline(
             "https://jakarta.ee/specifications/restful-ws/4.0/apidocs/",
-            rootProject.file("build-logic/src/javadoc-link/restful-ws/").toRelativeString(projectDir))
+            "$relativeRootDir/build-logic/src/javadoc-link/restful-ws/")
         linksOffline(
             "https://jakarta.ee/specifications/annotations/2.1/apidocs/",
-            rootProject.file("build-logic/src/javadoc-link/jakarta.annotation/").toRelativeString(projectDir))
+            "$relativeRootDir/build-logic/src/javadoc-link/jakarta.annotation/")
         linksOffline(
             "https://jspecify.dev/docs/api/",
-            rootProject.file("build-logic/src/javadoc-link/jspecify/").toRelativeString(projectDir))
+            "$relativeRootDir/build-logic/src/javadoc-link/jspecify/")
         linksOffline(
             "https://errorprone.info/api/latest/",
-            rootProject.file("build-logic/src/javadoc-link/errorprone/").toRelativeString(projectDir))
+            "$relativeRootDir/build-logic/src/javadoc-link/errorprone/")
         linksOffline(
             "https://javadoc.io/doc/com.nimbusds/oauth2-oidc-sdk/latest/",
-            rootProject.file("build-logic/src/javadoc-link/oauth2-oidc-sdk/").toRelativeString(projectDir))
+            "$relativeRootDir/build-logic/src/javadoc-link/oauth2-oidc-sdk/")
         linksOffline(
             "https://javadoc.io/doc/com.nimbusds/nimbus-jose-jwt/latest/",
-            rootProject.file("build-logic/src/javadoc-link/nimbus-jose-jwt/").toRelativeString(projectDir))
+            "$relativeRootDir/build-logic/src/javadoc-link/nimbus-jose-jwt/")
         linksOffline(
             "https://javadoc.io/doc/net.ltgt.oidc/oidc-servlets/$version/",
-            rootProject.file("build-logic/src/javadoc-link/oidc-servlets/").toRelativeString(projectDir))
+            "$relativeRootDir/build-logic/src/javadoc-link/oidc-servlets/")
         tags(
             "implSpec:a:Implementation Specification:",
         )
@@ -112,6 +113,6 @@ spotless {
         forbidWildcardImports()
         forbidModuleImports()
         googleJavaFormat(project.versionCatalogs.named("libs").findVersion("googleJavaFormat").orElseThrow().requiredVersion).reorderImports(true)
-        licenseHeaderFile(rootProject.file("LICENSE.header"))
+        licenseHeaderFile(rootProject.isolated.projectDirectory.file("LICENSE.header"))
     }
 }
