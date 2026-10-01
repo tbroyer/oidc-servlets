@@ -512,11 +512,11 @@ public class CallbackServlet extends HttpServlet {
               successResponse.getOIDCTokens().getIDToken(), authenticationState.nonce());
     } catch (BadJOSEException e) {
       revokeTokens(successResponse);
-      sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error validating ID Token", e);
+      sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Invalid ID Token", e);
       return;
     } catch (JOSEException e) {
       revokeTokens(successResponse);
-      sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Invalid ID Token", e);
+      sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error validating ID Token", e);
       return;
     }
 
