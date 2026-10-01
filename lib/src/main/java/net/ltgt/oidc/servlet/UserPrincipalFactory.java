@@ -42,6 +42,8 @@ public interface UserPrincipalFactory {
    * <p>This can be used to load additional user data into the session, that can be used by {@link
    * #createUserPrincipal} when creating the principal, and/or to synchronize user information from
    * the {@link SessionInfo} into a local database.
+   *
+   * <p>If it throws, authentication fails entirely.
    */
   default void userAuthenticated(SessionInfo sessionInfo, HttpSession session) {}
 }

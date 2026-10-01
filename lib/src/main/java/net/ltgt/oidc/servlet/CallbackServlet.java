@@ -475,8 +475,8 @@ public class CallbackServlet extends HttpServlet {
     TokenResponse tokenResponse;
     try {
       tokenResponse = send(session, tokenRequest);
-    } catch (ParseException | IOException | JOSEException e) {
-      sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error in token request", e);
+    } catch (Throwable t) {
+      sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error in token request", t);
       return;
     }
     // Now that we "used" the authorization code, we can check the authentication state for CSRF
@@ -514,9 +514,9 @@ public class CallbackServlet extends HttpServlet {
       revokeTokens(successResponse);
       sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Invalid ID Token", e);
       return;
-    } catch (JOSEException e) {
+    } catch (Throwable t) {
       revokeTokens(successResponse);
-      sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error validating ID Token", e);
+      sendError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error validating ID Token", t);
       return;
     }
 
@@ -527,10 +527,10 @@ public class CallbackServlet extends HttpServlet {
     UserInfoResponse userInfoResponse;
     try {
       userInfoResponse = send(session, userInfoRequest);
-    } catch (ParseException | IOException | JOSEException e) {
+    } catch (Throwable t) {
       revokeTokens(successResponse);
       sendError(
-          resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error in User Info request", e);
+          resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error in User Info request", t);
       return;
     }
     if (!userInfoResponse.indicatesSuccess()) {
@@ -550,19 +550,38 @@ public class CallbackServlet extends HttpServlet {
       try {
         userInfo =
             new UserInfo(userInfoResponse.toSuccessResponse().getUserInfoJWT().getJWTClaimsSet());
-      } catch (java.text.ParseException e) {
+      } catch (Throwable t) {
         revokeTokens(successResponse);
         sendError(
-            resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error parsing ID Token claims", e);
+            resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error parsing ID Token claims", t);
         return;
       }
     }
     req.changeSessionId();
     var sessionInfo =
         new SessionInfo(successResponse.getOIDCTokens().getIDToken(), idTokenClaims, userInfo);
+    try {
+      try {
+        userPrincipalFactory.userAuthenticated(sessionInfo, session);
+      } catch (Throwable t) {
+        revokeTokens(successResponse);
+        sendError(
+            resp,
+            HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+            "Error finalizing authentication",
+            t);
+        return;
+      } finally {
+        oauthTokensHandler.tokensAcquired(successResponse, session);
+      }
+    } catch (Throwable t) {
+      revokeTokens(successResponse);
+      sendError(
+          resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error finalizing authentication", t);
+      return;
+    }
+    // Do it last, in case any of the previous two callbacks fail
     session.setAttribute(SessionInfo.SESSION_ATTRIBUTE_NAME, sessionInfo);
-    userPrincipalFactory.userAuthenticated(sessionInfo, session);
-    oauthTokensHandler.tokensAcquired(successResponse, session);
     Utils.sendRedirect(resp, authenticationState.requestUri());
   }
 
