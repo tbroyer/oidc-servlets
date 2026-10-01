@@ -40,6 +40,7 @@
   "clients": [ {
     "clientId": "app",
     "enabled": true,
+    "fullScopeAllowed": false,
     "clientAuthenticatorType": "client-secret",
     "secret": "$(env:APP_CLIENT_SECRET)",
     "rootUrl": "$(env:APP_BASE_URL)",
@@ -63,5 +64,9 @@
         "claim.name": "realm_access.roles"
       }
     } ]
+  } ],
+  "scopeMappings": [ {
+    "client": "app",
+    "roles": [ "admin" ]
   } ]
 }
