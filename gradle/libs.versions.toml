@@ -1,12 +1,12 @@
 # Try to maintain entries sorted alphabetically inside each "group".
 [versions]
 errorprone = "2.50.0"
-jetty = "12.1.13"
+jetty = "12.1.14"
 junitJupiter = "6.1.3"
 nullaway = "0.14.2"
 
 # Versions used in build-logic
-googleJavaFormat = "1.36.1"
+googleJavaFormat = "1.37.0"
 ktlint = "1.8.0"
 
 [libraries]
@@ -27,7 +27,7 @@ nimbus-oidcSdk = "com.nimbusds:oauth2-oidc-sdk:11.38.2"
 nullaway-annotations = { module = "com.uber.nullaway:nullaway-annotations", version.ref = "nullaway" }
 resteasy-bom = "org.jboss.resteasy:resteasy-bom:7.0.5.Final"
 resteasy-core = { module = "org.jboss.resteasy:resteasy-core" }
-selenium = "org.seleniumhq.selenium:selenium-java:4.49.0"
+selenium = "org.seleniumhq.selenium:selenium-java:4.50.0"
 truth = "com.google.truth:truth:1.4.5"
 
 # Versions used in build-logic, libraries added here for Dependabot
