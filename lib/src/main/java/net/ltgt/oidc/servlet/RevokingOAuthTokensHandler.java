@@ -90,14 +90,13 @@ public class RevokingOAuthTokensHandler implements OAuthTokensHandler {
   }
 
   void revokeAsync(Token token) {
-    executor.execute(
-        () -> {
-          try {
-            revoke(token);
-          } catch (IOException e) {
-            handleError(e);
-          }
-        });
+    executor.execute(() -> {
+      try {
+        revoke(token);
+      } catch (IOException e) {
+        handleError(e);
+      }
+    });
   }
 
   private void revoke(Token token) throws IOException {

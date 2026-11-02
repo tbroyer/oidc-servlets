@@ -88,17 +88,17 @@ public class HasRoleTest {
     @Produces(MediaType.TEXT_HTML)
     public String private_(@Context SecurityContext securityContext) {
       return """
-          <!DOCTYPE html>
-          <html lang="en">
-          <head>
-              <meta charset="UTF-8">
-              <title>Private page</title>
-          </head>
-          <body>
-              <h1>Private page</h1>
-          </body>
-          </html>
-          """;
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <title>Private page</title>
+      </head>
+      <body>
+          <h1>Private page</h1>
+      </body>
+      </html>
+      """;
     }
 
     @GET
@@ -107,17 +107,17 @@ public class HasRoleTest {
     @Produces(MediaType.TEXT_HTML)
     public String admin(@Context SecurityContext securityContext) {
       return """
-          <!DOCTYPE html>
-          <html lang="en">
-          <head>
-              <meta charset="UTF-8">
-              <title>Admin page</title>
-          </head>
-          <body>
-              <h1>Admin page</h1>
-          </body>
-          </html>
-          """;
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <title>Admin page</title>
+      </head>
+      <body>
+          <h1>Admin page</h1>
+      </body>
+      </html>
+      """;
     }
   }
 

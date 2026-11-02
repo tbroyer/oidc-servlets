@@ -81,12 +81,11 @@ public class BrowserSwappingTest {
               // Mimic access by the attacker to access logs in near real-time
               contextHandler
                   .getServer()
-                  .setRequestLog(
-                      (request, response) -> {
-                        if (request.getHttpURI().getPath().equals(CALLBACK_PATH)) {
-                          callbackRequestUris.add(request.getHttpURI().asString());
-                        }
-                      });
+                  .setRequestLog((request, response) -> {
+                    if (request.getHttpURI().getPath().equals(CALLBACK_PATH)) {
+                      callbackRequestUris.add(request.getHttpURI().asString());
+                    }
+                  });
 
               contextHandler.addFilter(IsAuthenticatedFilter.class, "/*", null);
             });

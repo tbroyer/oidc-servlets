@@ -451,14 +451,13 @@ public class CallbackServlet extends HttpServlet {
     }
     var authenticationState =
         Optional.ofNullable(session)
-            .map(
-                session_ -> {
-                  var state =
-                      (AuthenticationState)
-                          session_.getAttribute(AuthenticationState.SESSION_ATTRIBUTE_NAME);
-                  session_.removeAttribute(AuthenticationState.SESSION_ATTRIBUTE_NAME);
-                  return state;
-                })
+            .map(session_ -> {
+              var state =
+                  (AuthenticationState)
+                      session_.getAttribute(AuthenticationState.SESSION_ATTRIBUTE_NAME);
+              session_.removeAttribute(AuthenticationState.SESSION_ATTRIBUTE_NAME);
+              return state;
+            })
             .orElse(null);
     // Do not check authentication state yet; exchange code first to prevent browser swapping attack
     // If the authentication state is missing, the PKCE code verifier will be missing as well, and
